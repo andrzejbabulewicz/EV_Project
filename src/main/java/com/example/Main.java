@@ -31,6 +31,8 @@ public class Main
 
         ContainerController container = rt.createMainContainer(p);
 
+
+
         List<Station> stations = Map.getStations();
 
         if (stations == null)
