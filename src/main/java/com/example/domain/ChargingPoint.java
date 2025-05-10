@@ -59,15 +59,10 @@ public class ChargingPoint {
         System.out.println(cpId + " scheduled session at slot: " + slot);
     }
 
-<<<<<<< HEAD
-    public void removeScheduledCharging(String evId) {
-        chargingQueue.removeIf(session -> session.getEvId().equals(evId));
-=======
 
     public void removeScheduledCharging(String evId, int slot)
     {
         chargingQueue[slot] = null;
->>>>>>> aa3337f9dc94674f3e0ecb61ed3dedcb8a00e352
         System.out.println(cpId + " removed scheduled session for EV: " + evId);
     }
 
