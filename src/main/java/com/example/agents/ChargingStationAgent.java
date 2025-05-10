@@ -13,11 +13,13 @@ import com.example.behaviours.CSListenBehaviour;
 import java.util.List;
 
 import com.example.domain.ChargingPoint;
+import lombok.Getter;
 
 public class ChargingStationAgent extends Agent {
     private AID stationId;
     private Station location;
 
+    @Getter
     public int realTime =0;
     public List<ChargingPoint> chargingPoints;
 
@@ -57,6 +59,7 @@ public class ChargingStationAgent extends Agent {
             @Override
             protected void onTick() {
                 realTime++;
+                //send to all evs INFORM
                 System.out.println(getLocalName() + "realTime = " + realTime);
             }
         });

@@ -27,7 +27,7 @@ public class EVRoamBehaviour extends CyclicBehaviour {
             evAgent.sortStations(evAgent.getCurrentLocation());
 
             evAgent.addBehaviour(new EVRequestCharging(evAgent));
-            evAgent.removeBehaviour(new EVRoamBehaviour(evAgent));
+            evAgent.removeBehaviour(this);
         }
         else {
             // Choose destination and roam randomly

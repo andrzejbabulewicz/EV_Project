@@ -83,7 +83,7 @@ public class Main
                     new Object[]{
                             chargerTypes.CCS2, // type
                             2.0,
-                            30.5,     // batteryLevel
+                            15.0,     // batteryLevel
                             100.0,    // maxBatteryLevel
                             stations.get(0), // currentLocation
                             500.0 // totalMoney
@@ -92,7 +92,7 @@ public class Main
                     new Object[]{
                             chargerTypes.Type2, // type
                             3.5,
-                            90.0,     // batteryLevel
+                            15.0,     // batteryLevel
                             100.0,    // maxBatteryLevel
                             stations.get(1), // currentLocation
                             500.0 // totalMoney

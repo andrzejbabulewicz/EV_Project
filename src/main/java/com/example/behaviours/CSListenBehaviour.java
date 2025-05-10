@@ -41,7 +41,8 @@ public class CSListenBehaviour extends CyclicBehaviour {
             String content = msg.getContent().trim();
             int slot;
             try {
-                slot = Integer.parseInt(content);
+
+                slot = Integer.parseInt(content) + csAgent.realTime;
             } catch (NumberFormatException e) {
                 // Malformed request: reject outright
                 ACLMessage err = msg.createReply();
