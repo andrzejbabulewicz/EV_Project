@@ -8,13 +8,19 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
+
 import com.example.domain.ChargingPoint;
 
 public class ChargingStationAgent extends Agent {
     private AID stationId;
     private String location;
     private List<ChargingPoint> chargingPoints;
+
+
 
     protected void setup() {
         stationId = getAID();
@@ -94,29 +100,64 @@ public class ChargingStationAgent extends Agent {
         @Override
         public void action() {
             ACLMessage msg = receive();
-            if (msg != null) {
-                if (msg.getPerformative() == ACLMessage.REQUEST) {
-                    System.out.println(getLocalName() + " received EV request: " + msg.getContent());
-                    ACLMessage reply = msg.createReply();
-
-                    //a dummy answer for now
-                    reply.setPerformative(ACLMessage.INFORM);
-                    reply.setContent("Request received. Processing...");
-                    send(reply);
-                    System.out.println(getLocalName() + " sent reply.");
+            if (msg != null && msg.getPerformative() == ACLMessage.REQUEST) {
+                String content = msg.getContent().trim();
+                int slot;
+                try {
+                    slot = Integer.parseInt(content);
+                } catch (NumberFormatException e) {
+                    // Malformed request: reject outright
+                    ACLMessage err = msg.createReply();
+                    err.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+                    err.setContent("Invalid slot number: " + content);
+                    send(err);
+                    return;
                 }
 
-                /*
-                * it should check the availability and return positive information
-                    with a suggested price to the EV in case of a free space
-                * in case of no free spaces, it sends the AIDs of EVs that match the time slot requirements
-                * for now, there is no price negotiation between EV and CS,
-                    left for future consideration
-                */
+                System.out.println(getLocalName() + " received request for slot " + slot);
 
+                // Try to find a free charging point for that slot
+                ChargingPoint chosen = null;
+                for (ChargingPoint cp : chargingPoints) {
+                    if (cp.getChargingSlots(slot) == null) {
+                        chosen = cp;
+                        break;
+                    }
+                }
+
+                ACLMessage reply = msg.createReply();
+                if (chosen != null) {
+                    // Free slot found: propose a price
+                    double dummyPrice = 10.0; // your pricing logic here
+                    reply.setPerformative(ACLMessage.PROPOSE);
+                    reply.setContent(String.format("%d:%.2f:%s", slot, dummyPrice, chosen.getCpId()));
+                    System.out.println(getLocalName() +
+                            " proposing slot " + slot + " at price " + dummyPrice +
+                            " on CP " + chosen.getCpId());
+                } else {
+                    // No free slot: collect occupying AIDs
+                    List<AID> occupants = new ArrayList<>();
+                    for (ChargingPoint cp : chargingPoints) {
+                        AID ev = cp.getChargingSlots(slot);
+                        if (ev != null && !occupants.contains(ev)) {
+                            occupants.add(ev);
+                        }
+                    }
+                    reply.setPerformative(ACLMessage.REFUSE);
+                    // join occupant AIDs by comma
+                    StringJoiner sj = new StringJoiner(",");
+                    for (AID evAid : occupants) {
+                        sj.add(evAid.getLocalName());
+                    }
+                    reply.setContent(String.format("%d:%s", slot, sj.toString()));
+                    System.out.println(getLocalName() +
+                            " rejecting slot " + slot + "; occupied by " + sj);
+                }
+                send(reply);
             } else {
                 block();
             }
         }
     }
+
 }

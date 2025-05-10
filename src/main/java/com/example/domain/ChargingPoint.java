@@ -1,5 +1,7 @@
 package com.example.domain;
 
+import jade.core.AID;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,13 +12,28 @@ public class ChargingPoint {
     private boolean isOccupied;
 
     private chargerTypes type;
-    private List<ScheduledCharging> chargingQueue = new ArrayList<>();
+    //private List<ScheduledCharging> chargingQueue = new ArrayList<>();
+    public static final int NUM_HOURS = 2;
+    public static final int SLOT_DURATION = 20;
+
+    public int getSlotNo() {
+        int tmp = NUM_HOURS*60;
+        int slotsNo = tmp/SLOT_DURATION;
+
+        return slotsNo;
+    }
+
+    public AID[] chargingQueue = new AID[getSlotNo()];
 
     public ChargingPoint(String cpId, boolean isOccupied) {
         this.cpId = cpId;
         this.isOccupied = isOccupied;
     }
 
+    public AID getChargingSlots(int slot)
+    {
+        return chargingQueue[slot];
+    }
     public String getCpId() {
         return cpId;
     }
@@ -33,19 +50,20 @@ public class ChargingPoint {
         isOccupied = occupied;
     }
 
-    public List<ScheduledCharging> getChargingQueue() {
-        return new ArrayList<>(chargingQueue);
+//    public AID<ScheduledCharging> getChargingQueue() {
+//        return new ArrayList<>(chargingQueue);
+//    }
+
+    public void addScheduledCharging(AID evId, int slot)
+    {
+        chargingQueue[slot] = evId;
+        System.out.println(cpId + " scheduled session at slot: " + slot);
     }
 
-    public void addScheduledCharging(String evId, long startTime, long endTime) {
-        ScheduledCharging session = new ScheduledCharging(evId, startTime, endTime);
-        chargingQueue.add(session);
-        System.out.println(cpId + " scheduled session: " + session);
-    }
 
-
-    public void removeScheduledCharging(String evId) {
-        chargingQueue.removeIf(session -> session.getEvId().equals(evId));
+    public void removeScheduledCharging(String evId, int slot)
+    {
+        chargingQueue[slot] = null;
         System.out.println(cpId + " removed scheduled session for EV: " + evId);
     }
 

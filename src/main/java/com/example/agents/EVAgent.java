@@ -100,6 +100,8 @@ public class EVAgent extends Agent {
         // Search through stations that were not asked before
     }
 
+
+
     private class EVSendRequestBehaviour extends CyclicBehaviour {
         private int step = 0;
         private ACLMessage replyMsg;
