@@ -39,5 +39,7 @@ public class EVGetStationsBehaviour extends WakerBehaviour {
         } catch (FIPAException e) {
             throw new InvalidServiceSpecification(e);
         }
+
+        evAgent.addBehaviour(new EVRoamBehaviour(evAgent));
     }
 }

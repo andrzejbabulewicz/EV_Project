@@ -1,5 +1,6 @@
 package com.example.agents;
 
+import com.example.domain.Map.*;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
@@ -15,7 +16,7 @@ import com.example.domain.ChargingPoint;
 
 public class ChargingStationAgent extends Agent {
     private AID stationId;
-    private String location;
+    private Station location;
 
     public int realTime =0;
     public List<ChargingPoint> chargingPoints;
@@ -38,10 +39,10 @@ public class ChargingStationAgent extends Agent {
         // Expected parameters: [location (String), chargingPoints (List<ChargingPoint>)]
         Object[] args = getArguments();
         if (args != null && args.length >= 2) {
-            //location = (String) args[0];
+            location = (Station)args[0];
             chargingPoints = (List<ChargingPoint>) args[1];
         } else {
-            location = "Undefined";
+            location = null;
             chargingPoints = null;
         }
         System.out.println(getLocalName() + " started at location: " + location);

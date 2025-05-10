@@ -82,10 +82,11 @@ public class Main
             AgentController ev1 = container.createNewAgent("ev1", "com.example.agents.EVAgent",
                     new Object[]{
                             chargerTypes.CCS2, // type
-                            2,
+                            2.0,
                             30.5,     // batteryLevel
                             100.0,    // maxBatteryLevel
                             stations.get(0), // currentLocation
+                            500.0 // totalMoney
                     });
             AgentController ev2 = container.createNewAgent("ev2", "com.example.agents.EVAgent",
                     new Object[]{
@@ -94,6 +95,7 @@ public class Main
                             90.0,     // batteryLevel
                             100.0,    // maxBatteryLevel
                             stations.get(1), // currentLocation
+                            500.0 // totalMoney
 
                     });
             cs1.start();

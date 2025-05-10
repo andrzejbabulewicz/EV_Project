@@ -18,7 +18,7 @@ public final class Map {
         );
 
         roads = List.of(
-                new Road(stations.get(0), stations.get(1), 10),
+                new Road(stations.get(0), stations.get(1), 5),
                 new Road(stations.get(1), stations.get(2), 8),
                 new Road(stations.get(2), stations.get(0), 3)
         );

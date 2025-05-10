@@ -13,65 +13,95 @@ public class EVRequestCharging extends CyclicBehaviour {
 
     private final EVAgent evAgent;
     private int tryCounter = 0;
-    private int step = 0;
+    private boolean rejected = false;
 
     public EVRequestCharging(EVAgent evAgent) { this.evAgent = evAgent; }
 
     public void action() {
         // Send messages to CS
 
-        if (step == 0) {
-
+        while (tryCounter < 2) {
+            // send request for a slot
             ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
             Station station = evAgent.getStationAtIndex(evAgent.getStationIndex());
             AID stationId = new AID(station.name(), AID.ISLOCALNAME);
 
             request.addReceiver(evAgent.getCurrentCommunicationAid());
-            request.setContent("Request for charging");
+
+            request.setContent("1");
+
             evAgent.send(request);
             System.out.println(evAgent.getLocalName() + " sent request to " + evAgent.getCurrentCommunication());
 
-            MessageTemplate conversationIDMatch = MessageTemplate.MatchConversationId("StationResponse");
-            MessageTemplate agreeOrRefuse = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE),
+            // wait for a proposal or a list of AIDs
+            MessageTemplate messageTemplate = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE),
                     MessageTemplate.MatchPerformative(ACLMessage.REFUSE));
-            MessageTemplate messageTemplate = MessageTemplate.and(conversationIDMatch, agreeOrRefuse);
-            ACLMessage message = myAgent.receive(messageTemplate);
-            if (message != null) {
-                if (message.getPerformative() == ACLMessage.AGREE) {
-                    // Handle accepted communication
-                    step++;
+            ACLMessage message = myAgent.blockingReceive(messageTemplate, 2000);
 
+            if (message != null) {
+                if (message.getPerformative() == ACLMessage.PROPOSE) {
+                    // Handle CS proposal
+                    String content = message.getContent();
+                    String[] parts = content.split(":");
+
+                    if (Double.parseDouble(parts[1]) < evAgent.getTotalMoney()) {
+                        // Accept the proposal
+                        ACLMessage confirm = message.createReply();
+                        confirm.setPerformative(ACLMessage.CONFIRM);
+
+                        confirm.setContent("OK");
+
+                        evAgent.send(confirm);
+
+                        evAgent.setSlot(Integer.parseInt(parts[0]));
+                        evAgent.setCpId(parts[2]);
+                        evAgent.setChargingPrice(Double.parseDouble(parts[1]));
+
+                        System.out.println(evAgent.getLocalName() + " accepts slot " + parts[0] + " at " +
+                                parts[2] + ", " + evAgent.getCurrentCommunication() +
+                                ", for $" + evAgent.getChargingPrice());
+
+                        // Travel to the charging point
+                        evAgent.travelToCp();
+                        evAgent.removeBehaviour(EVRequestCharging.this);
+                        evAgent.addBehaviour(new EVListenSellingBehaviour(evAgent));
+                    }
+                    else {
+                        // Price to high
+                        rejected = true;
+                        if (!evAgent.askNextStation())
+                        {
+                            // Start negotiations
+                            evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
+                            evAgent.removeBehaviour(EVRequestCharging.this);
+                        }
+                        break;
+                    }
 
                 } else {
                     // Handle rejected communication
-                    if (evAgent.getStationIndex() != evAgent.getSortedStations().size() - 1) {
-                        evAgent.setStationIndex(evAgent.getStationIndex() + 1);
-                        // talk to next station
+                    rejected = true;
+                    if (!evAgent.askNextStation())
+                    {
+                        // Start negotiations
+                        evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
+                        evAgent.removeBehaviour(EVRequestCharging.this);
                     }
-                    else {
-                        //start negotiation
-                        evAgent.setNegotiating(true);
-                    }
+                    break;
                 }
             }
-        } else {
-            MessageTemplate conversationIDMatch = MessageTemplate.MatchConversationId("StationResponse");
-            MessageTemplate infoOrRefuse = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),
-                    MessageTemplate.MatchPerformative(ACLMessage.INFORM));
-            MessageTemplate messageTemplate = MessageTemplate.and(conversationIDMatch, infoOrRefuse);
-            ACLMessage message = myAgent.receive(messageTemplate);
-            if (message != null) {
-                if (message.getPerformative() == ACLMessage.INFORM) {
-                    // Handle an offer from station
-                    // If it is full, station sends a list of EVs waiting to charge
-                    // If price is too high, request the list anyway, and: startNegotiation();
-                } else {
-                    // Handle refusal to give info
-                    evAgent.setAskingCS(false);
-                }
+            else {
+                tryCounter++;
+            }
+
+            // No response after multiple requests
+            if (!evAgent.askNextStation())
+            {
+                // Start negotiations
+                evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
+                evAgent.removeBehaviour(EVRequestCharging.this);
             }
         }
-        evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
     }
 
 }

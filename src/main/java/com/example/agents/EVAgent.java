@@ -46,6 +46,11 @@ public class EVAgent extends Agent {
     private java.util.Map<Station, Integer> sortedStations = new HashMap<>();
     @Setter private int stationIndex = 0;
 
+    // CP info
+    @Setter private int slot;
+    @Setter private String cpId;
+    @Setter private double chargingPrice;
+
     private List<AID> stations = new ArrayList<>();
     public List<AID> getStations() {
         return stations;
@@ -71,11 +76,11 @@ public class EVAgent extends Agent {
         batteryLevel = (double) args[2];
         maxBatteryLevel = (double) args[3];
         currentLocation = (Station) args[4];
+        totalMoney = (double) args[5];
 
         System.out.println(getLocalName() + " started at location: " + currentLocation);
 
         addBehaviour(new EVGetStationsBehaviour(this));
-        addBehaviour(new EVRoamBehaviour(this));
         System.out.printf("[%s] begins roaming.%n", this.getLocalName());
     }
 
@@ -91,11 +96,28 @@ public class EVAgent extends Agent {
 
         System.out.println(getLocalName() + " traveling to " + currentLocation.name());
         try {
-            sleep(road.distance());
+            sleep(road.distance() * 500);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         System.out.println(getLocalName() + " arrived at " + currentLocation.name());
+    }
+
+    public void travelToCp() {
+        // After getting a spot, travel to it
+        int distance = sortedStations.get(currentCommunication);
+        batteryLevel -= batteryPerKm * distance;
+        currentLocation = getStationAtIndex(stationIndex);
+        sortedStations.clear();
+
+        System.out.println(getLocalName() + " traveling to " + currentLocation.name() + " to charge");
+        try {
+            sleep(distance * 500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(getLocalName() + " arrived at " + currentLocation.name() + " to charge");
+
     }
 
     public void charge(int time) {
@@ -151,61 +173,19 @@ public class EVAgent extends Agent {
         return keys.get(index);
     }
 
-
-
-    private class EVSendRequestBehaviour extends CyclicBehaviour {
-        private int step = 0;
-        private ACLMessage replyMsg;
-        private Random random = new Random();
-
-        @Override
-        public void action() {
-            try
-            {
-                sleep(2000);
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
-                    // Check if there is any available station.
-                    if (stations == null || stations.isEmpty()) {
-                        System.out.println(getLocalName() + ": No available stations found, waiting...");
-                        block(); // wait 1s and then try again
-
-                    }
-                    // Pick a random station.
-                    else {
-                        int index = random.nextInt(stations.size());
-                        AID target = stations.get(index);
-
-                        // Create and send a dummy REQUEST.
-                        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-                        request.addReceiver(target);
-                        request.setContent("Dummy request from " + getLocalName());
-                        send(request);
-                        System.out.println(getLocalName() + " sent request to " + target.getLocalName());
-                        step = 1;
-
-
-
-                        // Wait for a reply.
-                        replyMsg = receive();
-                        if (replyMsg != null) {
-                            System.out.println(getLocalName() + " received reply: " + replyMsg.getContent());
-                            step = 2;
-                        } else {
-                            block(100); // not yet received, check again after 100ms
-                        }
-                    }
-
-
-
-                    // Wait 1 second before repeating the sequence.
-                    block(1000);
-                    step = 0;
-
-            }
+    public boolean askNextStation() {
+        // change current station to next closest
+        if(stationIndex < sortedStations.size() - 1) {
+            currentCommunication = getStationAtIndex(++stationIndex);
+            currentCommunicationAid = new AID(currentCommunication.name(), AID.ISLOCALNAME);
+            return true;
         }
+        else {
+            stationIndex = 0;
+            currentCommunication = getStationAtIndex(stationIndex);
+            currentCommunicationAid = new AID(currentCommunication.name(), AID.ISLOCALNAME);
+            return false;
+        }
+    }
 
 }
