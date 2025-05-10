@@ -34,7 +34,7 @@ public class EVListenSellingBehaviour extends CyclicBehaviour {
                 evAgent.charge(20);
                 System.out.println(evAgent.getLocalName() + " charged at " + evAgent.getCurrentLocation());
                 evAgent.addBehaviour(new EVRoamBehaviour(evAgent));
-                evAgent.removeBehaviour(EVListenSellingBehaviour.this);
+                evAgent.removeBehaviour(this);
             }
             else if (message.getPerformative() == ACLMessage.REQUEST) {
                 beginNegotiation(message.getSender());
@@ -43,6 +43,6 @@ public class EVListenSellingBehaviour extends CyclicBehaviour {
     }
 
     private void beginNegotiation(AID agent) {
-
+        // Negotiation from the selling side
     }
 }

@@ -65,7 +65,7 @@ public class EVRequestCharging extends CyclicBehaviour {
                             evAgent.travelToCp();
                         }
 
-                        evAgent.removeBehaviour(EVRequestCharging.this);
+                        evAgent.removeBehaviour(this);
                         evAgent.addBehaviour(new EVListenSellingBehaviour(evAgent));
                         return;
                     }
@@ -75,7 +75,7 @@ public class EVRequestCharging extends CyclicBehaviour {
                         {
                             // Start negotiations
                             evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
-                            evAgent.removeBehaviour(new EVRequestCharging(evAgent));
+                            evAgent.removeBehaviour(this);
                             return;
                         }
                         break;
@@ -96,7 +96,7 @@ public class EVRequestCharging extends CyclicBehaviour {
                     {
                         // Start negotiations
                         evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
-                        evAgent.removeBehaviour(new EVRequestCharging(evAgent));
+                        evAgent.removeBehaviour(this);
                         evAgent.setEvInQueueIndex(0);
                         return;
                     }

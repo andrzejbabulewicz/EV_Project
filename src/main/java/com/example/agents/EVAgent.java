@@ -32,11 +32,6 @@ public class EVAgent extends Agent {
     private double totalMoney;
     private double currentMaxBid;
 
-    // States
-    @Setter private boolean isNegotiating = false;
-    @Setter private boolean isWaiting = false;
-    @Setter private boolean isCharging = false;
-
     private Station currentLocation;
 
     @Setter private Station currentCommunication;
