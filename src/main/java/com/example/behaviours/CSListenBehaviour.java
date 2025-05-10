@@ -66,9 +66,9 @@ public class CSListenBehaviour extends CyclicBehaviour {
             if (chosen != null)
             {
                 // Free slot found: propose a price
-                double dummyPrice = 10.0; // your pricing logic here
+                int dummyPrice = 10; // your pricing logic here
                 reply.setPerformative(ACLMessage.PROPOSE);
-                reply.setContent(String.format("%d:%.2f:%s", slot, dummyPrice, chosen.getCpId()));
+                reply.setContent(String.format("%d:%d:%s", slot, dummyPrice, chosen.getCpId()));
                 System.out.println(myAgent.getLocalName() +
                         " proposing slot " + slot + " at price " + dummyPrice +
                         " on CP " + chosen.getCpId());
