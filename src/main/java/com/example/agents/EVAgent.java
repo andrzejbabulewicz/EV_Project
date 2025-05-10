@@ -8,33 +8,29 @@ import lombok.Setter;
 import com.example.behaviours.EVGetStationsBehaviour;
 import com.example.behaviours.EVRoamBehaviour;
 import com.example.domain.chargerTypes;
-import com.example.domain.Map.Station;
+import com.example.domain.Map.*;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
-import java.util.List;
-import java.util.Random;
 
-import java.util.ArrayList;
+import java.util.*;
 
-import static jdk.jfr.internal.EventWriterKey.block;
+import static java.lang.Thread.sleep;
+
+//import static jdk.jfr.internal.EventWriterKey.block;
 
 @Getter
 public class EVAgent extends Agent {
 
 
     private chargerTypes type;
+
+    private double batteryPerKm;
     private double batteryLevel;
     private double maxBatteryLevel;
 
     // Total money
     private double totalMoney;
     private double currentMaxBid;
-
-    // Behaviour states
-    @Setter private boolean isRoaming = true;
-    @Setter private boolean wantsToCharge = false;
-    @Setter private boolean isWaiting = false;
-    @Setter private boolean isCharging = false;
 
     // Communication states
     @Setter private boolean isNegotiating = false;
@@ -43,10 +39,12 @@ public class EVAgent extends Agent {
     @Setter private boolean isAnsweringEV = false;
 
     private Station currentLocation;
+
     @Setter private Station currentCommunication;
     @Setter private AID currentCommunicationAid;
-    private List<Station> refusedStations = new ArrayList<>();
-
+    
+    private java.util.Map<Station, Integer> sortedStations = new HashMap<>();
+    @Setter private int stationIndex = 0;
 
     private List<AID> stations = new ArrayList<>();
     public List<AID> getStations() {
@@ -58,7 +56,7 @@ public class EVAgent extends Agent {
         try
         {
             System.out.println(getLocalName() + ": you have 20s for setting up sniffer");
-            Thread.sleep(20000);
+            sleep(20000);
         }
         catch (InterruptedException e)
         {
@@ -69,14 +67,14 @@ public class EVAgent extends Agent {
 
         final Object[] args = getArguments();
         type = (chargerTypes) args[0];
-        batteryLevel = (double) args[1];
-        maxBatteryLevel = (double) args[2];
-        currentLocation = (Station) args[3];
+        batteryPerKm = (double) args[1];
+        batteryLevel = (double) args[2];
+        maxBatteryLevel = (double) args[3];
+        currentLocation = (Station) args[4];
 
         System.out.println(getLocalName() + " started at location: " + currentLocation);
 
         addBehaviour(new EVGetStationsBehaviour(this));
-        addBehaviour(new EVSendRequestBehaviour());
         addBehaviour(new EVRoamBehaviour(this));
         System.out.printf("[%s] begins roaming.%n", this.getLocalName());
     }
@@ -85,9 +83,19 @@ public class EVAgent extends Agent {
         System.out.println(getLocalName() + " terminating.");
     }
 
-    public void travel(Station from, Station to) {
+    public void travel(Road road) {
         // Traveling between ChargingStations
         // Dijkstra Algorithm
+        batteryLevel -= batteryPerKm * road.distance();
+        currentLocation = road.from().name() == currentLocation.name() ? road.to() : road.from();
+
+        System.out.println(getLocalName() + " traveling to " + currentLocation.name());
+        try {
+            sleep(road.distance());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(getLocalName() + " arrived at " + currentLocation.name());
     }
 
     public void charge(int time) {
@@ -95,9 +103,52 @@ public class EVAgent extends Agent {
         // After that start roaming
     }
 
-    public void lookForOtherStation() {
-        // If the current station is full and no EV agrees to sell their spot
-        // Search through stations that were not asked before
+    public void sortStations(Station currentStation) {
+        // Distance map initialized with infinity, except the current station (0)
+        java.util.Map<Station, Integer> distances = new HashMap<>();
+        for (Station station : com.example.domain.Map.getStations()) {
+            distances.put(station, Integer.MAX_VALUE);
+        }
+        distances.put(currentStation, 0);
+
+        // Priority queue to select the station with the smallest tentative distance
+        PriorityQueue<Map.Entry<Station, Integer>> pq = new PriorityQueue<>(
+                java.util.Map.Entry.comparingByValue()
+        );
+        pq.offer(java.util.Map.entry(currentStation, 0));
+
+        while (!pq.isEmpty()) {
+            java.util.Map.Entry<Station, Integer> currentEntry = pq.poll();
+            Station current = currentEntry.getKey();
+            int currentDistance = currentEntry.getValue();
+
+            // Check neighbors
+            for (Road road : com.example.domain.Map.getRoads()) {
+                if (road.from().equals(current)) {
+                    Station neighbor = road.to();
+                    int newDist = currentDistance + road.distance();
+                    if (newDist < distances.get(neighbor)) {
+                        distances.put(neighbor, newDist);
+                        pq.offer(java.util.Map.entry(neighbor, newDist));
+                    }
+                }
+            }
+        }
+
+        // Sort the distances by value (distance)
+        sortedStations =  distances.entrySet().stream()
+                .sorted(java.util.Map.Entry.comparingByValue())
+                .collect(LinkedHashMap::new,
+                        (m, e) -> m.put(e.getKey(), e.getValue()),
+                        LinkedHashMap::putAll);
+    }
+
+    public Station getStationAtIndex(int index) {
+        List<Station> keys = new ArrayList<>(sortedStations.keySet());
+        if (index < 0 || index >= keys.size()) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + keys.size());
+        }
+        return keys.get(index);
     }
 
     private class EVSendRequestBehaviour extends CyclicBehaviour {
@@ -109,7 +160,7 @@ public class EVAgent extends Agent {
         public void action() {
             try
             {
-                Thread.sleep(2000);
+                sleep(2000);
             }
             catch (InterruptedException e)
             {

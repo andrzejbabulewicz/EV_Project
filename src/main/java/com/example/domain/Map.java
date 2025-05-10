@@ -3,7 +3,7 @@ package com.example.domain;
 
 import lombok.Getter;
 
-import java.util.List;
+import java.util.*;
 
 public final class Map {
     @Getter
@@ -17,7 +17,7 @@ public final class Map {
                 new Station("CS3")
         );
 
-         roads = List.of(
+        roads = List.of(
                 new Road(stations.get(0), stations.get(1), 10),
                 new Road(stations.get(1), stations.get(2), 8),
                 new Road(stations.get(2), stations.get(0), 3)
@@ -26,4 +26,6 @@ public final class Map {
 
     public record Station(String name) {}
     public record Road(Station from, Station to, int distance) {}
+
+
 }

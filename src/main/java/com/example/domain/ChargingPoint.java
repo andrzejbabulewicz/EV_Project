@@ -8,7 +8,6 @@ import java.util.List;
 public class ChargingPoint {
     private String cpId;
     private boolean isOccupied;
-
     private chargerTypes type;
     private List<ScheduledCharging> chargingQueue = new ArrayList<>();
 
@@ -42,7 +41,6 @@ public class ChargingPoint {
         chargingQueue.add(session);
         System.out.println(cpId + " scheduled session: " + session);
     }
-
 
     public void removeScheduledCharging(String evId) {
         chargingQueue.removeIf(session -> session.getEvId().equals(evId));
