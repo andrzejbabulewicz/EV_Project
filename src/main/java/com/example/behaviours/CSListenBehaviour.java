@@ -1,15 +1,10 @@
 package com.example.behaviours;
 
-import com.example.agents.EVAgent;
 import com.example.domain.ChargingPoint;
 import com.example.agents.ChargingStationAgent;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
-import jade.core.Agent;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
 
 
 import java.util.ArrayList;
@@ -18,13 +13,13 @@ import java.util.StringJoiner;
 
 
 
-public class EVRequestBehaviour extends CyclicBehaviour {
+public class CSListenBehaviour extends CyclicBehaviour {
 
     //private final List<ChargingPoint> chargingPoints;
     private final ChargingStationAgent csAgent;
 
 
-    public EVRequestBehaviour(ChargingStationAgent csAgent) {
+    public CSListenBehaviour(ChargingStationAgent csAgent) {
         super(csAgent);
         this.csAgent = csAgent;
         //this.chargingPoints = csAgent.getChargingPoints();

@@ -2,20 +2,15 @@ package com.example.agents;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
-import jade.lang.acl.ACLMessage;
-import com.example.behaviours.EVRequestBehaviour;
+import com.example.behaviours.CSListenBehaviour;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 import com.example.domain.ChargingPoint;
-import lombok.Getter;
 
 public class ChargingStationAgent extends Agent {
     private AID stationId;
@@ -56,7 +51,7 @@ public class ChargingStationAgent extends Agent {
         }
         registerInDF();
 
-        addBehaviour(new EVRequestBehaviour(this));
+        addBehaviour(new CSListenBehaviour(this));
     }
 
     private void registerInDF() {
