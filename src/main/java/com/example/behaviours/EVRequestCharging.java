@@ -13,7 +13,6 @@ public class EVRequestCharging extends CyclicBehaviour {
 
     private final EVAgent evAgent;
     private int tryCounter = 0;
-    private boolean rejected = false;
 
     public EVRequestCharging(EVAgent evAgent) { this.evAgent = evAgent; }
 
@@ -37,11 +36,11 @@ public class EVRequestCharging extends CyclicBehaviour {
             MessageTemplate messageTemplate = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE),
                     MessageTemplate.MatchPerformative(ACLMessage.REFUSE));
             ACLMessage message = myAgent.blockingReceive(messageTemplate, 2000);
+            String content = message.getContent();
 
             if (message != null) {
                 if (message.getPerformative() == ACLMessage.PROPOSE) {
                     // Handle CS proposal
-                    String content = message.getContent();
                     String[] parts = content.split(":");
 
                     if (Double.parseDouble(parts[1]) < evAgent.getTotalMoney()) {
@@ -68,7 +67,6 @@ public class EVRequestCharging extends CyclicBehaviour {
                     }
                     else {
                         // Price to high
-                        rejected = true;
                         if (!evAgent.askNextStation())
                         {
                             // Start negotiations
@@ -80,7 +78,15 @@ public class EVRequestCharging extends CyclicBehaviour {
 
                 } else {
                     // Handle rejected communication
-                    rejected = true;
+                    String[] parts = content.split(":");
+                    String[] aidStrings = parts[1].split(",");
+
+                    // Add ev's available for negotiations
+                    for (String s : aidStrings) {
+                        evAgent.getEvAgentsInQueue().add(new AID(s, AID.ISLOCALNAME));
+                    }
+
+
                     if (!evAgent.askNextStation())
                     {
                         // Start negotiations

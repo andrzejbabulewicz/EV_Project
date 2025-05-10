@@ -32,11 +32,10 @@ public class EVAgent extends Agent {
     private double totalMoney;
     private double currentMaxBid;
 
-    // Communication states
+    // States
     @Setter private boolean isNegotiating = false;
-    @Setter private boolean isAskingCS = false;
-    @Setter private boolean isAskingEV = false;
-    @Setter private boolean isAnsweringEV = false;
+    @Setter private boolean isWaiting = false;
+    @Setter private boolean isCharging = false;
 
     private Station currentLocation;
 
@@ -50,6 +49,8 @@ public class EVAgent extends Agent {
     @Setter private int slot;
     @Setter private String cpId;
     @Setter private double chargingPrice;
+
+    @Setter private List<AID> evAgentsInQueue = new ArrayList<>();
 
     private List<AID> stations = new ArrayList<>();
     public List<AID> getStations() {

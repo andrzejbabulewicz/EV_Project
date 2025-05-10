@@ -12,6 +12,7 @@ public class EVListenSellingBehaviour extends CyclicBehaviour {
     public EVListenSellingBehaviour(EVAgent evAgent) { this.evAgent = evAgent; }
     @Override
     public void action() {
+        // Logic for waiting in queue and listening for negotiation proposals
 
     }
 }
