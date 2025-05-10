@@ -8,13 +8,23 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
+import com.example.behaviours.EVRequestBehaviour;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
+
 import com.example.domain.ChargingPoint;
+import lombok.Getter;
 
 public class ChargingStationAgent extends Agent {
     private AID stationId;
     private String location;
-    private List<ChargingPoint> chargingPoints;
+
+
+    public List<ChargingPoint> chargingPoints;
+
+
 
     protected void setup() {
         stationId = getAID();
@@ -46,8 +56,9 @@ public class ChargingStationAgent extends Agent {
         }
         registerInDF();
 
-        addBehaviour(new EVRequestBehaviour());
+        addBehaviour(new EVRequestBehaviour(this));
     }
+
     private void registerInDF() {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
@@ -90,33 +101,6 @@ public class ChargingStationAgent extends Agent {
     }
 
 
-    private class EVRequestBehaviour extends CyclicBehaviour {
-        @Override
-        public void action() {
-            ACLMessage msg = receive();
-            if (msg != null) {
-                if (msg.getPerformative() == ACLMessage.REQUEST) {
-                    System.out.println(getLocalName() + " received EV request: " + msg.getContent());
-                    ACLMessage reply = msg.createReply();
 
-                    //a dummy answer for now
-                    reply.setPerformative(ACLMessage.INFORM);
-                    reply.setContent("Request received. Processing...");
-                    send(reply);
-                    System.out.println(getLocalName() + " sent reply.");
-                }
 
-                /*
-                * it should check the availability and return positive information
-                    with a suggested price to the EV in case of a free space
-                * in case of no free spaces, it sends the AIDs of EVs that match the time slot requirements
-                * for now, there is no price negotiation between EV and CS,
-                    left for future consideration
-                */
-
-            } else {
-                block();
-            }
-        }
-    }
 }
