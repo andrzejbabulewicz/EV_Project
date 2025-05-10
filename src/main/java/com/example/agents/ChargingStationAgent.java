@@ -72,6 +72,7 @@ public class ChargingStationAgent extends Agent {
                         msg.addReceiver(ev);
                         msg.setContent("You can start charging now");
                         send(msg);
+                        System.out.println(ev.getLocalName() + ": starts charging at " + cp.getCpId());
                     }
                 }
                 System.out.println(getLocalName() + "realTime = " + realTime);
