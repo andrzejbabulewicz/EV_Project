@@ -2,6 +2,7 @@ package com.example.agents;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
@@ -16,7 +17,7 @@ public class ChargingStationAgent extends Agent {
     private AID stationId;
     private String location;
 
-
+    public int realTime =0;
     public List<ChargingPoint> chargingPoints;
 
 
@@ -50,6 +51,14 @@ public class ChargingStationAgent extends Agent {
             System.out.println(getLocalName() + " has no charging points set.");
         }
         registerInDF();
+
+        addBehaviour(new TickerBehaviour(this,10000) {
+            @Override
+            protected void onTick() {
+                realTime++;
+                System.out.println(getLocalName() + "realTime = " + realTime);
+            }
+        });
 
         addBehaviour(new CSListenBehaviour(this));
     }

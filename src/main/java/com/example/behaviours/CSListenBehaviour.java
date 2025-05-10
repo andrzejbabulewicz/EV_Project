@@ -5,6 +5,13 @@ import com.example.agents.ChargingStationAgent;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.core.behaviours.CyclicBehaviour;
+import java.lang.Object;
+import jade.core.Agent;
+import java.lang.Cloneable;
 
 
 import java.util.ArrayList;
@@ -27,6 +34,8 @@ public class CSListenBehaviour extends CyclicBehaviour {
 
     @Override
     public void action() {
+        boolean was_offered = false;
+
         ACLMessage msg = myAgent.receive();
         if (msg != null && msg.getPerformative() == ACLMessage.REQUEST) {
             String content = msg.getContent().trim();
@@ -54,7 +63,8 @@ public class CSListenBehaviour extends CyclicBehaviour {
             }
 
             ACLMessage reply = msg.createReply();
-            if (chosen != null) {
+            if (chosen != null)
+            {
                 // Free slot found: propose a price
                 double dummyPrice = 10.0; // your pricing logic here
                 reply.setPerformative(ACLMessage.PROPOSE);
@@ -62,7 +72,10 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 System.out.println(myAgent.getLocalName() +
                         " proposing slot " + slot + " at price " + dummyPrice +
                         " on CP " + chosen.getCpId());
-            } else {
+                was_offered = true;
+            }
+            else
+            {
                 // No free slot: collect occupying AIDs
                 List<AID> occupants = new ArrayList<>();
                 for (ChargingPoint cp : csAgent.chargingPoints) {
@@ -82,6 +95,27 @@ public class CSListenBehaviour extends CyclicBehaviour {
                         " rejecting slot " + slot + "; occupied by " + sj);
             }
             myAgent.send(reply);
+            if(was_offered==true)
+            {
+                ACLMessage confirm = myAgent.blockingReceive(
+                        MessageTemplate.MatchPerformative(ACLMessage.CONFIRM),
+                        2000
+                );
+                if (confirm != null) {
+                    // Got confirmation—book it
+                    AID evAID = confirm.getSender();
+                    chosen.chargingQueue[slot] = evAID;
+                    System.out.println(getAgent().getLocalName() +
+                            " confirmed booking of slot " + slot +
+                            " on CP " + chosen.getCpId() +
+                            " for EV " + evAID.getLocalName());
+                } else {
+                    // No confirmation arrived in time
+                    System.out.println(getAgent().getLocalName() +
+                            " did not receive CONFIRM for slot " + slot +
+                            "; proposal expired.");
+                }
+            }
         } else {
             block();
         }
