@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EVListenBuyingBehaviour extends CyclicBehaviour {
-
+    /// NEGOTIATING BUYING SIDE
     private final EVAgent evAgent;
     private List<AID> evsInQueue = new ArrayList<>();
     private int evCount = 0;

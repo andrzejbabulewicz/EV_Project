@@ -50,7 +50,8 @@ public class EVAgent extends Agent {
     @Setter private String cpId;
     @Setter private double chargingPrice;
 
-    @Setter private List<AID> evAgentsInQueue = new ArrayList<>();
+    @Setter private List<AID> evInQueue = new ArrayList<>();
+    @Setter private int evInQueueIndex = 0;
 
     private List<AID> stations = new ArrayList<>();
     public List<AID> getStations() {
@@ -124,6 +125,15 @@ public class EVAgent extends Agent {
     public void charge(int time) {
         // Charge and stop listening for negotiations
         // After that start roaming
+        double dummyPower = 2; // Charging per minute
+        batteryLevel += time * dummyPower;
+        if (batteryLevel > maxBatteryLevel)
+            batteryLevel = maxBatteryLevel;
+        try {
+            sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void sortStations(Station currentStation) {
