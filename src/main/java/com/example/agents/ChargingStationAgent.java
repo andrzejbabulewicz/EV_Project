@@ -10,9 +10,11 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import com.example.behaviours.CSListenBehaviour;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.example.domain.ChargingPoint;
+import jade.lang.acl.ACLMessage;
 import lombok.Getter;
 
 public class ChargingStationAgent extends Agent {
@@ -60,6 +62,18 @@ public class ChargingStationAgent extends Agent {
             protected void onTick() {
                 realTime++;
                 //send to all evs INFORM
+
+                //List<AID> occupants = new ArrayList<>();
+                for (ChargingPoint cp : chargingPoints) {
+                    AID ev = cp.getChargingSlots(realTime);
+                    if(ev != null)
+                    {
+                        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                        msg.addReceiver(ev);
+                        msg.setContent("You can start charging now");
+                        send(msg);
+                    }
+                }
                 System.out.println(getLocalName() + "realTime = " + realTime);
             }
         });
