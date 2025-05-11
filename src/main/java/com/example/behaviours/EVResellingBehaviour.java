@@ -6,6 +6,8 @@ import jade.lang.acl.MessageTemplate;
 import jade.core.AID;
 import com.example.agents.EVAgent;
 
+import java.util.Locale;
+
 public class EVResellingBehaviour extends CyclicBehaviour {
     private final EVAgent evAgent;
 
@@ -43,19 +45,28 @@ public class EVResellingBehaviour extends CyclicBehaviour {
 
             ACLMessage reply = msg.createReply();
 
-            if (offer >= minPrice) {
-                // Round 2: buyer already made an acceptable offer, accept immediately
+
+            if (offer < minPrice) {
+                // Too low, reject immediately
+                reply.setPerformative(ACLMessage.REFUSE);
+                reply.setContent("Offer below minimum: " + offer);
+                myAgent.send(reply);
+                System.out.println("Refused low offer from " + buyer.getLocalName() + ": " + offer);
+            } else if (Math.abs(offer - firstBid) < 0.01) {
+                // Round 2: buyer matched our counter
                 reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                reply.setContent("Deal accepted for price: " + offer);
+                reply.setContent("Accepted at counter price: " + offer);
                 myAgent.send(reply);
-                System.out.println("Accepted offer from " + buyer.getLocalName());
-                // You could now release the slot etc.
+                System.out.println("Accepted counter-offer from " + buyer.getLocalName());
             } else {
-                // Round 1: reply with a counter-proposal
+                // Round 1: propose a counter-offer
+                double minAfterFirstBid = minPrice + 0.25 * (offer - minPrice); // conservative bump
+                evAgent.setMinAfterFirstBid(minAfterFirstBid); // store for use in next round
+
                 reply.setPerformative(ACLMessage.PROPOSE);
-                reply.setContent(String.valueOf(firstBid));
+                reply.setContent(String.format(Locale.US, "%.2f", firstBid));
                 myAgent.send(reply);
-                System.out.println("Proposed counter-offer: " + firstBid);
+                System.out.println("Proposed counter: " + firstBid + ", will accept >= " + minAfterFirstBid);
             }
         } else {
             block();

@@ -28,6 +28,8 @@ public class EVAgent extends Agent {
     private double batteryLevel;
     private double maxBatteryLevel;
 
+    @Getter @Setter public double minAfterFirstBid;
+
     // Total money
     private double totalMoney;
     private double currentMaxBid;
