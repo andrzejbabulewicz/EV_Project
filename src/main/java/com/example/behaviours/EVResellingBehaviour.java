@@ -33,9 +33,9 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 return;
             }
 
-            double minPrice = evAgent.getSlotPricePaid();               // won't sell below this
-            double maxPrice = minPrice * 2;                             // won't ask more than double
-            double chargeFactor = (100 - evAgent.getBatteryLevel()) / 100.0; // inverse weight
+            double minPrice = evAgent.getSlotPricePaid();
+            double maxPrice = minPrice * 2;
+            double chargeFactor = (100 - evAgent.getBatteryLevel()) / 100.0;
             double firstBid = minPrice + (maxPrice - minPrice) * chargeFactor;
 
             System.out.printf("[%s] Received CFP from %s: %.2f, calculated first bid: %.2f\n",

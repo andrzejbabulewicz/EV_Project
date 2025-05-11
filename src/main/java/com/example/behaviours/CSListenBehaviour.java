@@ -16,6 +16,7 @@ import java.lang.Cloneable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.StringJoiner;
 
 
@@ -34,6 +35,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
 
     @Override
     public void action() {
+        double basePrice = csAgent.getBasePrice();
         boolean was_offered = false;
 
         ACLMessage msg = myAgent.receive();
@@ -69,7 +71,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 // Free slot found: propose a price
                 int dummyPrice = 10; // your pricing logic here
                 reply.setPerformative(ACLMessage.PROPOSE);
-                reply.setContent(String.format("%d:%d:%s", slot, dummyPrice, chosen.getCpId()));
+                reply.setContent(String.format(Locale.US,"%d:%.2f:%s", slot, basePrice, chosen.getCpId()));
                 System.out.println(myAgent.getLocalName() +
                         " proposing slot " + slot + " at price " + dummyPrice +
                         " on CP " + chosen.getCpId());
@@ -92,7 +94,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
                     sj.add(evAid.getLocalName());
                 }
                 int dummyPrice=10;
-                reply.setContent(String.format("%d:%d:%s", slot, dummyPrice, sj.toString()));
+                reply.setContent(String.format(Locale.US ,"%d:%.2f:%s", slot, basePrice, sj.toString()));
                 System.out.println(myAgent.getLocalName() +
                         " rejecting slot " + slot + "; occupied by " + sj);
             }

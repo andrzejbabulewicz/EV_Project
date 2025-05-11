@@ -25,6 +25,8 @@ public class ChargingStationAgent extends Agent {
     public int realTime =0;
     public List<ChargingPoint> chargingPoints;
 
+    @Getter public double basePrice = 10.00;
+
 
 
     protected void setup() {
