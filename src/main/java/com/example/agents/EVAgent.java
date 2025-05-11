@@ -42,6 +42,7 @@ public class EVAgent extends Agent {
 
     // CP info
     @Setter private int slot;
+    @Getter private int slotPricePaid;
     @Setter private String cpId;
     @Setter private double chargingPrice;
 
