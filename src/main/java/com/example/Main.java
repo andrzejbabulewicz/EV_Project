@@ -98,12 +98,14 @@ public class Main
                             500.0 // totalMoney
 
                     });
+
             cs1.start();
             cs2.start();
             cs3.start();
 
             ev1.start();
             ev2.start();
+
 
             System.out.println("CS, CP, and EV agents have been started.");
         }

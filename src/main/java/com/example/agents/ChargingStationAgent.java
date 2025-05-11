@@ -25,6 +25,8 @@ public class ChargingStationAgent extends Agent {
     public int realTime =0;
     public List<ChargingPoint> chargingPoints;
 
+
+
     @Getter public double basePrice = 10.00;
 
 
@@ -82,6 +84,24 @@ public class ChargingStationAgent extends Agent {
         });
 
         addBehaviour(new CSListenBehaviour(this));
+    }
+
+    public double calculateFactoredPrice(int slot)
+    {
+        int totalPoints = chargingPoints.size();
+        int occupiedPoints = 0;
+        for(ChargingPoint cp : chargingPoints)
+        {
+            if(cp.chargingQueue[slot]!=null)
+            {
+                occupiedPoints++;
+            }
+        }
+
+        double occupancyFactor = 1+((double)occupiedPoints/totalPoints);
+        double urgencyFactor = (slot-realTime <= 1) ? 1.2 : 1.0;
+
+        return basePrice * occupancyFactor * urgencyFactor;
     }
 
     private void registerInDF() {

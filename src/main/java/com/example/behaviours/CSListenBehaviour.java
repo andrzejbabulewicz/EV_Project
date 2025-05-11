@@ -69,11 +69,11 @@ public class CSListenBehaviour extends CyclicBehaviour {
             if (chosen != null)
             {
                 // Free slot found: propose a price
-                int dummyPrice = 10; // your pricing logic here
+                double price = csAgent.calculateFactoredPrice(slot);
                 reply.setPerformative(ACLMessage.PROPOSE);
-                reply.setContent(String.format(Locale.US,"%d:%.2f:%s", slot, basePrice, chosen.getCpId()));
+                reply.setContent(String.format(Locale.US,"%d:%.2f:%s", slot, price, chosen.getCpId()));
                 System.out.println(myAgent.getLocalName() +
-                        " proposing slot " + slot + " at price " + dummyPrice +
+                        " proposing slot " + slot + " at price " + price +
                         " on CP " + chosen.getCpId());
                 was_offered = true;
             }
@@ -93,8 +93,8 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 for (AID evAid : occupants) {
                     sj.add(evAid.getLocalName());
                 }
-                int dummyPrice=10;
-                reply.setContent(String.format(Locale.US ,"%d:%.2f:%s", slot, basePrice, sj.toString()));
+                double price = csAgent.calculateFactoredPrice(slot);
+                reply.setContent(String.format(Locale.US ,"%d:%.2f:%s", slot, price, sj.toString()));
                 System.out.println(myAgent.getLocalName() +
                         " rejecting slot " + slot + "; occupied by " + sj);
             }
