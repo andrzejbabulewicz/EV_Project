@@ -91,7 +91,8 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 for (AID evAid : occupants) {
                     sj.add(evAid.getLocalName());
                 }
-                reply.setContent(String.format("%d:%s", slot, sj.toString()));
+                int dummyPrice=10;
+                reply.setContent(String.format("%d:%d:%s", slot, dummyPrice, sj.toString()));
                 System.out.println(myAgent.getLocalName() +
                         " rejecting slot " + slot + "; occupied by " + sj);
             }
