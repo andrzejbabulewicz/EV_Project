@@ -36,7 +36,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         batteryRatio = evAgent.getBatteryRatio();
         myName = evAgent.getLocalName();
         negotiationRound = 1;
-        maxRounds = (int)(chargingUrgency * 5); // HARDCODED MAX 5
+        maxRounds = (int)(1 + chargingUrgency * 5); // HARDCODED MAX 5
 
         System.out.printf("[%s] Init values: meanPrice=%.2f, urgency=%.2f, money=%.2f\n",
                 myAgent.getLocalName(), meanPrice, chargingUrgency, money);
@@ -91,7 +91,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
             }
 
             // Finalizing negotiations
-            if (negotiationRound == maxRounds) {
+            if (negotiationRound >= maxRounds) {
 
                 // Collect proposals and decide which to buy
                 double counterBid;
