@@ -37,9 +37,10 @@ public class EVRequestCharging extends CyclicBehaviour {
             MessageTemplate messageTemplate = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE),
                     MessageTemplate.MatchPerformative(ACLMessage.REFUSE));
             ACLMessage message = myAgent.blockingReceive(messageTemplate, 2000);
-            String content = message.getContent();
+
 
             if (message != null) {
+                String content = message.getContent();
                 if (message.getPerformative() == ACLMessage.PROPOSE) {
                     // Handle CS proposal
                     String[] parts = content.split(":");
