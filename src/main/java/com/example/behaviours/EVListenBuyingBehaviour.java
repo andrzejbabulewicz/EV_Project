@@ -53,7 +53,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         List<java.util.Map.Entry<AID, Double>> oldBids = new ArrayList<>();
         List<java.util.Map.Entry<AID, Double>> newBids = new ArrayList<>();
 
-        long timeout = 3000;
+        long timeout = 2000;
         int count = allEVs.size();
         double initialBid = generateInitialBid();
 
@@ -71,7 +71,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         // Main negotiation loop
         while (true) {
 
-            System.out.printf("[%s] negotiations, round %d", myAgent.getLocalName(), negotiationRound);
+            System.out.printf("[%s] negotiations, round %d\n", myAgent.getLocalName(), negotiationRound);
             long start = System.currentTimeMillis();
 
             MessageTemplate temp1 = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),
@@ -154,11 +154,11 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                             ));
                         else
                         {
-                            double newBid = getValueByKey(oldBids, sender);
+                            double newBid = generateNextBid(getValueByKey(oldBids, sender), counterBid);
                             if (newBid != -1)
                                 newBids.add(new AbstractMap.SimpleEntry<>(
                                         sender,
-                                        generateNextBid(newBid, counterBid)
+                                        newBid
                                 ));
                         }
 
