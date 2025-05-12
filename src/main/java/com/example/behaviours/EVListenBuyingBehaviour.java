@@ -267,23 +267,52 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
     }
 
     private double generateNextBid(double lastBid, double sellerCounter) {
+//        double maxWillingToPay = Math.min(
+//                money,
+//                chargingUrgency * 1.7 * meanPrice
+//        );
+//
+//        // Calculate a more controlled increase
+//        double bidGap = sellerCounter - lastBid;
+//        double increase = 0.05 * meanPrice + 0.1 * bidGap; // Small bump
+//
+//        double nextBid = lastBid + increase;
+//
+//        // Only bid if the next bid is still below max willing to pay
+//        if (nextBid <= maxWillingToPay && nextBid < sellerCounter) {
+//            return nextBid;
+//        } else {
+//            return -1; // Give up
+//        }
         double maxWillingToPay = Math.min(
                 money,
-                chargingUrgency * 1.7 * meanPrice
+                chargingUrgency * 1.6 * meanPrice
         );
 
-        // Calculate a more controlled increase
-        double bidGap = sellerCounter - lastBid;
-        double increase = 0.05 * meanPrice + 0.1 * bidGap; // Small bump
+        // Buffer to allow tolerance near the edge of willingness
+        double toleranceBuffer = 0.05 * meanPrice; // e.g., 5% leeway
+
+        if (lastBid == -1) {
+            // Start with a bid that's reasonable, but not too far from the seller
+            double initialBid = Math.min(sellerCounter * 0.85, maxWillingToPay);
+            return initialBid;
+        }
+
+        // Use urgency to modulate aggression
+        double urgencyFactor = Math.max(0.05, Math.min(0.3, chargingUrgency * 0.1));
+
+        // Compute a gradual increase
+        double increase = urgencyFactor * (sellerCounter - lastBid);
+        increase = Math.max(increase, 0.02 * meanPrice); // Ensure a minimum step
 
         double nextBid = lastBid + increase;
 
-        // Only bid if the next bid is still below max willing to pay
-        if (nextBid <= maxWillingToPay && nextBid < sellerCounter) {
+        // Accept nextBid if it's within a buffer above max willingness
+        if (nextBid <= maxWillingToPay + toleranceBuffer) {
             return nextBid;
-        } else {
-            return -1; // Give up
         }
+
+        return -1; // Still too much
     }
 
 }
