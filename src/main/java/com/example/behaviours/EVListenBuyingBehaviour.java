@@ -2,15 +2,15 @@ package com.example.behaviours;
 
 import com.example.domain.Map;
 import jade.core.AID;
-import jade.core.behaviours.CyclicBehaviour;
 
+import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import com.example.agents.EVAgent;
 
 import java.util.*;
 
-public class EVListenBuyingBehaviour extends CyclicBehaviour {
+public class EVListenBuyingBehaviour extends OneShotBehaviour {
     /// NEGOTIATING BUYING SIDE
     private final EVAgent evAgent;
     private double tryCount = 0;
@@ -38,16 +38,24 @@ public class EVListenBuyingBehaviour extends CyclicBehaviour {
         negotiationRound = 1;
         maxRounds = (int)(chargingUrgency * 5); // HARDCODED MAX 5
 
-        System.out.println(myAgent.getLocalName() + " starting negotiations");
+        System.out.printf("[%s] starting negotiations, round %d", myAgent.getLocalName(), negotiationRound);
         beginNegotiations();
     }
 
     private void beginNegotiations() {
 
         List<AID> allEVs = evAgent.getEvInQueue();
-        List<java.util.Map.Entry<AID, Double>> counterBids = new ArrayList<>();
+        List<ACLMessage> replies = new ArrayList<>();
+
+        List<java.util.Map.Entry<AID, Double>> oldBids = new ArrayList<>();
+        List<java.util.Map.Entry<AID, Double>> newBids = new ArrayList<>();
+
+        long timeout = 3000;
         int count = allEVs.size();
         double initialBid = generateInitialBid();
+
+        AID finalSeller = null;
+        double finalPrice = Double.MAX_VALUE;
 
         // Send initial offer
         ACLMessage msg = new ACLMessage(ACLMessage.CFP);
@@ -57,19 +65,10 @@ public class EVListenBuyingBehaviour extends CyclicBehaviour {
         }
         evAgent.send(msg);
 
-
-        long timeout = 3000;
-
-        List<ACLMessage> replies = new ArrayList<>();
-        List<java.util.Map.Entry<AID, Double>> oldBids = new ArrayList<>();
-        List<java.util.Map.Entry<AID, Double>> newBids = new ArrayList<>();
-
-        AID finalSeller = null;
-        double finalPrice = Double.MAX_VALUE;
-
         // Main negotiation loop
         while (true) {
 
+            System.out.printf("[%s] negotiations, round %d", myAgent.getLocalName(), negotiationRound);
             long start = System.currentTimeMillis();
 
             MessageTemplate temp1 = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),
@@ -83,8 +82,6 @@ public class EVListenBuyingBehaviour extends CyclicBehaviour {
 
                 if (reply != null) {
                     replies.add(reply);
-                    System.out.println("Received reply from " + reply.getSender().getLocalName() +
-                            ": " + reply.getContent());
                 } else {
                     block(100); // Pause a bit to avoid CPU overload
                 }
@@ -149,11 +146,19 @@ public class EVListenBuyingBehaviour extends CyclicBehaviour {
 
                     try {
                         counterBid = Double.parseDouble(reply.getContent().trim());
-                        counterBids.add(new AbstractMap.SimpleEntry<>(sender, counterBid));
                         if (negotiationRound == 1)
-                            newBids.add(new AbstractMap.SimpleEntry<>(sender, generateNextBid(initialBid, counterBid)));
+                            newBids.add(new AbstractMap.SimpleEntry<>(
+                                    sender,
+                                    generateNextBid(initialBid, counterBid)
+                            ));
                         else
-                            newBids.add(new AbstractMap.SimpleEntry<>(sender, generateNextBid(getValueByKey(oldBids, sender), counterBid)));
+                            newBids.add(new AbstractMap.SimpleEntry<>(
+                                    sender,
+                                    generateNextBid(getValueByKey(oldBids, sender), counterBid)
+                            ));
+
+                        System.out.printf("[%s] Received bid from %s: %.2f, calculated counter: %.2f\n",
+                                evAgent.getLocalName(), sender.getLocalName(), counterBid, newBids.getLast().getValue());
 
                     } catch (NumberFormatException e) {
                         System.out.println(evAgent.getLocalName()
@@ -169,6 +174,8 @@ public class EVListenBuyingBehaviour extends CyclicBehaviour {
                             finalPrice = entry.getValue();
                         }
                     }
+                    System.out.printf("[%s] Proposal accepted by %s: %.2f\n",
+                            evAgent.getLocalName(), finalSeller.getLocalName(), finalPrice);
                     break;
                 }
             }
@@ -178,7 +185,7 @@ public class EVListenBuyingBehaviour extends CyclicBehaviour {
             ACLMessage rejectMsg = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
             for (java.util.Map.Entry<AID, Double> entry : newBids) {
                 if (entry.getValue() != -1) {
-                    msg.setContent(String.format(Locale.US, "%s:%.2f", myName, entry.getValue()));
+                    msg.setContent(String.format(Locale.US, "%.2f", entry.getValue()));
                     msg.addReceiver(entry.getKey());
                 }
                 else {
@@ -210,8 +217,7 @@ public class EVListenBuyingBehaviour extends CyclicBehaviour {
                     evAgent.setCpId(parts[1]);
 
                     evAgent.travelToCp(station);
-                    evAgent.removeBehaviour(this);
-                    evAgent.addBehaviour(new EVListenSellingBehaviour(evAgent));
+                    evAgent.addBehaviour(new EVListenSellingBehaviour(evAgent)); // MERGE NEEDED
                     return;
                 }
                 tryCount++;
@@ -223,7 +229,6 @@ public class EVListenBuyingBehaviour extends CyclicBehaviour {
             evAgent.setCurrentCommunicationAid(new AID(evAgent.getCurrentCommunication().name(), AID.ISLOCALNAME));
 
             evAgent.sortStations(evAgent.getCurrentLocation());
-            evAgent.removeBehaviour(this);
             evAgent.addBehaviour(new EVRequestCharging(evAgent));
         }
 
@@ -255,7 +260,7 @@ public class EVListenBuyingBehaviour extends CyclicBehaviour {
         double baseWillingness = chargingUrgency * meanPrice;
         // Make sure bid is affordable
         double bid = Math.min(money, baseWillingness * 0.8);
-        return roundToCents(bid);
+        return bid;
     }
 
     private double generateNextBid(double lastBid, double sellerCounter) {
@@ -275,10 +280,7 @@ public class EVListenBuyingBehaviour extends CyclicBehaviour {
             return -1; // Signal that the buyer refuses to go higher
         }
 
-        return roundToCents(nextBid);
+        return nextBid;
     }
 
-    private double roundToCents(double amount) {
-        return Math.round(amount * 100.0) / 100.0;
-    }
 }
