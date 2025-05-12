@@ -89,7 +89,7 @@ public class EVAgent extends Agent {
 
         addBehaviour(new EVGetStationsBehaviour(this));
         System.out.printf("[%s] begins roaming.%n", this.getLocalName());
-        addBehaviour(new EVResellingBehaviour(this));
+
     }
 
     protected void takeDown() {

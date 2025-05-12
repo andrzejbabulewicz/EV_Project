@@ -57,6 +57,7 @@ public class EVRequestCharging extends CyclicBehaviour {
                         evAgent.setCpId(parts[2]);
                         evAgent.setChargingPrice(Double.parseDouble(parts[1]));
 
+
                         System.out.println(evAgent.getLocalName() + " accepts slot " + parts[0] + " at " +
                                 parts[2] + ", " + evAgent.getCurrentCommunication() +
                                 ", for $" + evAgent.getChargingPrice());
@@ -67,7 +68,8 @@ public class EVRequestCharging extends CyclicBehaviour {
                         }
 
                         evAgent.removeBehaviour(this);
-                        evAgent.addBehaviour(new EVListenSellingBehaviour(evAgent));
+                        //evAgent.addBehaviour(new EVListenSellingBehaviour(evAgent));
+                        evAgent.addBehaviour(new EVResellingBehaviour(evAgent));
                         return;
                     }
                     else {

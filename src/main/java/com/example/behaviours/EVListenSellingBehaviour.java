@@ -38,4 +38,8 @@ public class EVListenSellingBehaviour extends CyclicBehaviour {
             }
         }
     }
+
+    private void beginNegotiation(AID agent) {
+        // Negotiation from the selling side
+    }
 }
