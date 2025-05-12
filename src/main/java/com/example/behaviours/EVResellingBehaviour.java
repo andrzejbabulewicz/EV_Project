@@ -64,20 +64,18 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 ACLMessage reply = msg.createReply();
 
 
-                if (offer < minPrice) {
+                if (offer < minPrice)
+                {
                     // Too low, reject immediately
                     reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
                     reply.setContent("Offer below minimum: " + offer);
                     myAgent.send(reply);
                     System.out.println("Refused low offer from " + buyer.getLocalName() + ": " + offer);
-                } else if (Math.abs(offer - firstBid) < 1) {
-                    // Round 2: buyer matched our counter
-                    reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                    reply.setContent("Accepted at counter price: " + offer);
-                    myAgent.send(reply);
-                    System.out.println("Accepted counter-offer from " + buyer.getLocalName());
-                } else {
-                    // Round 1: propose a counter-offer
+                }
+                else
+                {
+                    ACLMessage testmsg = msg.createReply();
+
                     double minAfterFirstBid = offer + 0.4 * Math.abs(maxPrice - offer); // conservative bump
                     evAgent.setMinAfterFirstBid(minAfterFirstBid); // store for use in next round
 
@@ -90,6 +88,10 @@ public class EVResellingBehaviour extends CyclicBehaviour {
             else if(msg.getPerformative()==ACLMessage.ACCEPT_PROPOSAL)
             {
                 System.out.printf("accept proposal received\n");
+                ACLMessage replyConfirm = msg.createReply();
+                replyConfirm.setPerformative(ACLMessage.INFORM);
+                replyConfirm.setContent(String.format(Locale.US, "%s:%s", evAgent.getCurrentLocation().name(), evAgent.getCpId()));
+                //send to cs
             }
 
         } else {
