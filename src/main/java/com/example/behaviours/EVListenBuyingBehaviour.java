@@ -38,6 +38,9 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         negotiationRound = 1;
         maxRounds = (int)(chargingUrgency * 5); // HARDCODED MAX 5
 
+        System.out.printf("[%s] Init values: meanPrice=%.2f, urgency=%.2f, money=%.2f\n",
+                myAgent.getLocalName(), meanPrice, chargingUrgency, money);
+
         System.out.printf("[%s] starting negotiations, round %d", myAgent.getLocalName(), negotiationRound);
         beginNegotiations();
     }

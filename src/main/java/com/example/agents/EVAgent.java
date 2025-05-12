@@ -1,5 +1,6 @@
 package com.example.agents;
 
+import com.example.behaviours.EVResellingBehaviour;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -57,10 +58,9 @@ public class EVAgent extends Agent {
 
     @Setter private List<AID> evInQueue = new ArrayList<>();
 
+    @Getter
     private List<AID> stations = new ArrayList<>();
-    public List<AID> getStations() {
-        return stations;
-    }
+
     @Override
     protected void setup() {
 
@@ -89,6 +89,7 @@ public class EVAgent extends Agent {
 
         addBehaviour(new EVGetStationsBehaviour(this));
         System.out.printf("[%s] begins roaming.%n", this.getLocalName());
+        addBehaviour(new EVResellingBehaviour(this));
     }
 
     protected void takeDown() {
@@ -212,7 +213,7 @@ public class EVAgent extends Agent {
     public void calculateMeanPrice() {
         if (pricesCount == 0)
             return;
-        meanPrice = sumOfPrices / pricesCount;
+        this.meanPrice = sumOfPrices / pricesCount;
         sumOfPrices = 0;
         pricesCount = 0;
     }
