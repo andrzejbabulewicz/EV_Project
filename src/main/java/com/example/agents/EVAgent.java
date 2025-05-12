@@ -24,15 +24,22 @@ public class EVAgent extends Agent {
 
     private chargerTypes type;
 
+    // EV specification
     private double batteryPerKm;
     private double batteryLevel;
     private double maxBatteryLevel;
 
-    @Getter @Setter public double minAfterFirstBid;
+    @Setter public double minAfterFirstBid;
 
     // Total money
     private double totalMoney;
-    private double currentMaxBid;
+
+    // Parameters when buying
+    private double chargingUrgency; // 0.0 - 1.0 predefined
+
+    @Setter private double sumOfPrices = 0;
+    @Setter private double pricesCount = 0;
+    @Setter private double meanPrice = 0;
 
     private Station currentLocation;
 
@@ -42,14 +49,13 @@ public class EVAgent extends Agent {
     private java.util.Map<Station, Integer> sortedStations = new HashMap<>();
     @Setter private int stationIndex = 0;
 
-    // CP info
+    // CP info when in queue
     @Setter private int slot;
     @Getter private int slotPricePaid;
     @Setter private String cpId;
     @Setter private double chargingPrice;
 
     @Setter private List<AID> evInQueue = new ArrayList<>();
-    @Setter private int evInQueueIndex = 0;
 
     private List<AID> stations = new ArrayList<>();
     public List<AID> getStations() {
@@ -77,6 +83,7 @@ public class EVAgent extends Agent {
         maxBatteryLevel = (double) args[3];
         currentLocation = (Station) args[4];
         totalMoney = (double) args[5];
+        chargingUrgency = (double) args[6];
 
         System.out.println(getLocalName() + " started at location: " + currentLocation);
 
@@ -103,9 +110,9 @@ public class EVAgent extends Agent {
         System.out.println(getLocalName() + " arrived at " + currentLocation.name());
     }
 
-    public void travelToCp() {
+    public void travelToCp(Station station) {
         // After getting a spot, travel to it
-        int distance = sortedStations.get(currentCommunication);
+        int distance = sortedStations.get(station);
         batteryLevel -= batteryPerKm * distance;
         currentLocation = getStationAtIndex(stationIndex);
         sortedStations.clear();
@@ -197,4 +204,20 @@ public class EVAgent extends Agent {
         }
     }
 
+    public void sumNextPrice(double price) {
+        if (pricesCount == 0)
+            return;
+        sumOfPrices += price;
+        pricesCount++;
+    }
+
+    public void calculateMeanPrice() {
+        meanPrice = sumOfPrices / pricesCount;
+        sumOfPrices = 0;
+        pricesCount = 0;
+    }
+
+    public double getBatteryRatio() {
+        return batteryLevel / maxBatteryLevel;
+    }
 }

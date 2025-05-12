@@ -13,6 +13,7 @@ public class EVRequestCharging extends CyclicBehaviour {
 
     private final EVAgent evAgent;
     private int tryCounter = 0;
+    private double currentPrice = 0;
 
     public EVRequestCharging(EVAgent evAgent) { this.evAgent = evAgent; }
 
@@ -62,7 +63,7 @@ public class EVRequestCharging extends CyclicBehaviour {
 
                         // Travel to the charging point
                         if (!evAgent.getCurrentLocation().equals(evAgent.getCurrentCommunication())) {
-                            evAgent.travelToCp();
+                            evAgent.travelToCp(evAgent.getCurrentCommunication());
                         }
 
                         evAgent.removeBehaviour(this);
@@ -70,9 +71,15 @@ public class EVRequestCharging extends CyclicBehaviour {
                         return;
                     }
                     else {
-                        // Price to high
+                        // Price too high FOR NOW IT IS USELESS
+
+                        if (currentPrice != 0)
+                            evAgent.sumNextPrice(currentPrice);
+
                         if (!evAgent.askNextStation())
                         {
+                            evAgent.calculateMeanPrice();
+
                             // Start negotiations
                             evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
                             evAgent.removeBehaviour(this);
@@ -84,20 +91,28 @@ public class EVRequestCharging extends CyclicBehaviour {
                 } else {
                     // Handle rejected communication
                     String[] parts = content.split(":");
-                    String[] names = parts[1].split(",");
+
+                    currentPrice = Double.parseDouble(parts[1]);
+                    String[] names = parts[2].split(",");
+
+                    // Get the lowest price
+
 
                     // Add ev's available for negotiations
                     for (String s : names) {
                         evAgent.getEvInQueue().add(new AID(s, AID.ISLOCALNAME));
                     }
 
+                    if (currentPrice != 0)
+                        evAgent.sumNextPrice(currentPrice);
 
                     if (!evAgent.askNextStation())
                     {
+                        evAgent.calculateMeanPrice();
+
                         // Start negotiations
                         evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
                         evAgent.removeBehaviour(this);
-                        evAgent.setEvInQueueIndex(0);
                         return;
                     }
                     break;
@@ -107,13 +122,15 @@ public class EVRequestCharging extends CyclicBehaviour {
                 tryCounter++;
             }
 
+
             // No response after multiple requests
             if (!evAgent.askNextStation())
             {
+                evAgent.calculateMeanPrice();
+
                 // Start negotiations
                 evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
                 evAgent.removeBehaviour(new EVRequestCharging(evAgent));
-                evAgent.setEvInQueueIndex(0);
                 return;
             }
         }

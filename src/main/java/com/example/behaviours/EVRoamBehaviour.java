@@ -18,14 +18,14 @@ public class EVRoamBehaviour extends CyclicBehaviour {
     @Override
     public void action() {
 
-
-        if (evAgent.getBatteryLevel() < evAgent.getMaxBatteryLevel() * 0.2) {
+        // Some randomness for the decision-making
+        Random random = new Random();
+        if (evAgent.getBatteryLevel() < evAgent.getMaxBatteryLevel() * (0.2 + random.nextDouble() * 0.3)) {
 
             evAgent.setCurrentCommunication(evAgent.getCurrentLocation());
             evAgent.setCurrentCommunicationAid(new AID(evAgent.getCurrentCommunication().name(), AID.ISLOCALNAME));
 
             evAgent.sortStations(evAgent.getCurrentLocation());
-
             evAgent.addBehaviour(new EVRequestCharging(evAgent));
             evAgent.removeBehaviour(this);
         }

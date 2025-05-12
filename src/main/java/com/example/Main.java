@@ -7,8 +7,6 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
-import com.example.agents.EVAgent;
-import com.example.agents.ChargingStationAgent;
 import com.example.domain.ChargingPoint;
 import com.example.domain.Map;
 import com.example.domain.chargerTypes;
@@ -16,6 +14,7 @@ import com.example.domain.Map.Station;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static java.lang.System.exit;
 
@@ -78,6 +77,8 @@ public class Main
                             }},
                     });
 
+
+            Random r = new Random();
             //------------Initialize Electric Vehicles---------------
             AgentController ev1 = container.createNewAgent("ev1", "com.example.agents.EVAgent",
                     new Object[]{
@@ -86,7 +87,8 @@ public class Main
                             15.0,     // batteryLevel
                             100.0,    // maxBatteryLevel
                             stations.get(0), // currentLocation
-                            500.0 // totalMoney
+                            500.0, // totalMoney
+                            r.nextDouble() // chargingUrgency
                     });
             AgentController ev2 = container.createNewAgent("ev2", "com.example.agents.EVAgent",
                     new Object[]{
@@ -95,7 +97,8 @@ public class Main
                             15.0,     // batteryLevel
                             100.0,    // maxBatteryLevel
                             stations.get(1), // currentLocation
-                            500.0 // totalMoney
+                            500.0, // totalMoney
+                            r.nextDouble() // chargingUrgency
 
                     });
 

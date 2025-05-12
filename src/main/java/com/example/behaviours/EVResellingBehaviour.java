@@ -48,7 +48,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
 
             if (offer < minPrice) {
                 // Too low, reject immediately
-                reply.setPerformative(ACLMessage.REFUSE);
+                reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
                 reply.setContent("Offer below minimum: " + offer);
                 myAgent.send(reply);
                 System.out.println("Refused low offer from " + buyer.getLocalName() + ": " + offer);

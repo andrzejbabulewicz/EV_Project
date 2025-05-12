@@ -24,6 +24,15 @@ public final class Map {
         );
     }
 
+    public static Station getStationByName(String name) {
+        for (Station station : stations) {
+            if (station.name().equals(name)) {
+                return station;
+            }
+        }
+        return null;
+    }
+
     public record Station(String name) {}
     public record Road(Station from, Station to, int distance) {}
 
