@@ -36,12 +36,12 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         batteryRatio = evAgent.getBatteryRatio();
         myName = evAgent.getLocalName();
         negotiationRound = 1;
-        maxRounds = (int)(1 + chargingUrgency * 5); // HARDCODED 1 - 5
+        maxRounds = 2;//(int)(1 + chargingUrgency * 5);
 
         System.out.printf("[%s] Init values: meanPrice=%.2f, urgency=%.2f, money=%.2f\n",
                 myAgent.getLocalName(), meanPrice, chargingUrgency, money);
 
-        System.out.printf("[%s] starting negotiations, round %d", myAgent.getLocalName(), negotiationRound);
+        System.out.printf("[%s] starting negotiations\n", myAgent.getLocalName());
         beginNegotiations();
     }
 
@@ -53,7 +53,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         List<java.util.Map.Entry<AID, Double>> oldBids = new ArrayList<>();
         List<java.util.Map.Entry<AID, Double>> newBids = new ArrayList<>();
 
-        long timeout = 2000;
+        long timeout = 4000;
         int count = allEVs.size();
         double initialBid = generateInitialBid();
 
@@ -146,22 +146,18 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                         counterBid = Double.parseDouble(reply.getContent().trim());
                         if (negotiationRound == 1) {
                             double newBid = generateNextBid(initialBid, counterBid);
-                            if (newBid != -1)
-                            {
+                            if (newBid != -1) {
                                 newBids.add(new AbstractMap.SimpleEntry<>(
                                         sender,
                                         generateNextBid(initialBid, counterBid)
                                 ));
 
-                            System.out.printf("[%s] Received bid from %s: %.2f, calculated counter: %.2f\n",
-                                    evAgent.getLocalName(), sender.getLocalName(), counterBid, newBid);
+                                System.out.printf("[%s] Received bid from %s: %.2f, calculated counter: %.2f\n",
+                                        evAgent.getLocalName(), sender.getLocalName(), counterBid, newBid);
                             }
-                        }
-                        else
-                        {
+                        } else {
                             double newBid = generateNextBid(getValueByKey(oldBids, sender), counterBid);
-                            if (newBid != -1)
-                            {
+                            if (newBid != -1) {
                                 newBids.add(new AbstractMap.SimpleEntry<>(
                                         sender,
                                         newBid
@@ -172,46 +168,27 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                         }
 
 
-
                     } catch (NumberFormatException e) {
                         System.out.println(evAgent.getLocalName()
                                 + " ERROR received bad message during negotiation");
                     }
                 }
-//                else if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-//
-//                    // Price accepted by the seller EV
-//                    if (negotiationRound == 1) {
-//                        finalPrice = initialBid;
-//                    }
-//                    else {
-//                        for (java.util.Map.Entry<AID, Double> entry : oldBids) {
-//                            if (entry.getKey().equals(finalSeller)) {
-//                                finalPrice = entry.getValue();
-//                            }
-//                        }
-//                    }
-//                    finalSeller = reply.getSender();
-//
-//                    System.out.printf("[%s] Proposal accepted by %s: %.2f\n",
-//                            evAgent.getLocalName(), finalSeller.getLocalName(), finalPrice);
-//                    break;
-//                }
             }
 
             // Send proposals and rejection messages
-            msg = new ACLMessage(ACLMessage.PROPOSE);
+
             ACLMessage rejectMsg = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
             for (java.util.Map.Entry<AID, Double> entry : newBids) {
                 if (entry.getValue() != -1) {
+                    msg = new ACLMessage(ACLMessage.PROPOSE);
                     msg.setContent(String.format(Locale.US, "%.2f", entry.getValue()));
                     msg.addReceiver(entry.getKey());
+                    evAgent.send(msg);
                 }
                 else {
                     rejectMsg.addReceiver(entry.getKey());
                 }
             }
-            evAgent.send(msg);
             evAgent.send(rejectMsg);
 
             negotiationRound++;
@@ -282,7 +259,6 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
     }
 
     private double generateNextBid(double lastBid, double sellerCounter) {
-        negotiationRound++;
 
         double maxWillingToPay = Math.min(
                 money,
