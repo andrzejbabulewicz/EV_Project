@@ -217,7 +217,9 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                     message = myAgent.blockingReceive(messageTemplate, 2000);
                     if (message != null) {
                         evAgent.travelToCp(station);
-                        evAgent.addBehaviour(new EVListenSellingBehaviour(evAgent));
+                        evAgent.setEvInQueue(new ArrayList<>());
+
+                        evAgent.addBehaviour(new EVResellingBehaviour(evAgent));
                         return;
                     }
                 }
@@ -229,6 +231,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
             // If all rejected then go back to asking CS's
             evAgent.setCurrentCommunication(evAgent.getCurrentLocation());
             evAgent.setCurrentCommunicationAid(new AID(evAgent.getCurrentCommunication().name(), AID.ISLOCALNAME));
+            evAgent.setEvInQueue(new ArrayList<>());
 
             evAgent.sortStations(evAgent.getCurrentLocation());
             evAgent.addBehaviour(new EVRequestCharging(evAgent));
