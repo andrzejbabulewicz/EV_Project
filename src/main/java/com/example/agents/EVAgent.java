@@ -136,7 +136,7 @@ public class EVAgent extends Agent {
         if (batteryLevel > maxBatteryLevel)
             batteryLevel = maxBatteryLevel;
         try {
-            sleep(15000);
+            sleep(20000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

@@ -131,8 +131,9 @@ public class CSListenBehaviour extends CyclicBehaviour {
         {
             ACLMessage sth = msg.createReply();
             String[] parts = msg.getContent().split(":");
-            String name = parts[0];
-            String cpName = parts[1];
+            int slot_no = Integer.parseInt(parts[0]);
+            String name = parts[1];
+            String cpName = parts[2];
 
             AID senderAID = msg.getSender();
 
@@ -141,15 +142,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 if(cp.getCpId().equals(cpName))
                 {
                     AID Aid = new AID(name, AID.ISLOCALNAME);
-
-                    for(int i=0;i<cp.chargingQueue.length;i++)
-                    {
-                        if(cp.chargingQueue[i].getLocalName().equals(name))
-                        {
-                            cp.chargingQueue[i] = Aid;
-                        }
-                    }
-
+                    cp.chargingQueue[slot_no] = Aid;
                 }
             }
 

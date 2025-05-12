@@ -110,7 +110,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
 
                 AID evBuyer = msg.getSender();
 
-                reply.setContent(String.format(Locale.US, "%s:%s", evBuyer.getLocalName(),evAgent.getCpId()));
+                reply.setContent(String.format(Locale.US, "%d:%s:%s",evAgent.getSlot(), evBuyer.getLocalName(),evAgent.getCpId()));
                 myAgent.send(reply);
 
 
