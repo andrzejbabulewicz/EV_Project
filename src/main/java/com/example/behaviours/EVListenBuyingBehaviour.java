@@ -147,14 +147,13 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                         counterBid = Double.parseDouble(reply.getContent().trim());
                         if (negotiationRound == 1) {
                             double newBid = generateNextBid(initialBid, counterBid);
+                            System.out.printf("[%s] Received bid from %s: %.2f, calculated counter: %.2f\n",
+                                    evAgent.getLocalName(), sender.getLocalName(), counterBid, newBid);
                             if (newBid != -1) {
                                 newBids.add(new AbstractMap.SimpleEntry<>(
                                         sender,
-                                        generateNextBid(initialBid, counterBid)
+                                        newBid
                                 ));
-
-                                System.out.printf("[%s] Received bid from %s: %.2f, calculated counter: %.2f\n",
-                                        evAgent.getLocalName(), sender.getLocalName(), counterBid, newBid);
                             }
                         } else {
                             double newBid = generateNextBid(getValueByKey(oldBids, sender), counterBid);
@@ -260,22 +259,23 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
     }
 
     private double generateNextBid(double lastBid, double sellerCounter) {
-
         double maxWillingToPay = Math.min(
                 money,
-                chargingUrgency * 1.5 * meanPrice
+                chargingUrgency * 1.6 * meanPrice
         );
 
-        // Increase bid slightly based on how urgent the need is and how far off the counter is
-        double increaseFactor = 0.1 * negotiationRound + (sellerCounter - lastBid) * 0.1;
+        // Calculate a more controlled increase
+        double bidGap = sellerCounter - lastBid;
+        double increase = 0.05 * meanPrice + 0.1 * bidGap; // Small bump
 
-        double nextBid = lastBid + increaseFactor * meanPrice;
+        double nextBid = lastBid + increase;
 
-        if (nextBid > maxWillingToPay || lastBid == -1) {
-            return -1; // Signal that the buyer refuses to go higher
+        // Only bid if the next bid is still below max willing to pay
+        if (nextBid <= maxWillingToPay && nextBid < sellerCounter) {
+            return nextBid;
+        } else {
+            return -1; // Give up
         }
-
-        return nextBid;
     }
 
 }
