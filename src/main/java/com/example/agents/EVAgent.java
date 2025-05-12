@@ -205,13 +205,13 @@ public class EVAgent extends Agent {
     }
 
     public void sumNextPrice(double price) {
-        if (pricesCount == 0)
-            return;
         sumOfPrices += price;
         pricesCount++;
     }
 
     public void calculateMeanPrice() {
+        if (pricesCount == 0)
+            return;
         meanPrice = sumOfPrices / pricesCount;
         sumOfPrices = 0;
         pricesCount = 0;

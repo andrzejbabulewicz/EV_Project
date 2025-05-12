@@ -95,8 +95,6 @@ public class EVRequestCharging extends CyclicBehaviour {
                     currentPrice = Double.parseDouble(parts[1]);
                     String[] names = parts[2].split(",");
 
-                    // Get the lowest price
-
 
                     // Add ev's available for negotiations
                     for (String s : names) {
@@ -127,7 +125,6 @@ public class EVRequestCharging extends CyclicBehaviour {
             if (!evAgent.askNextStation())
             {
                 evAgent.calculateMeanPrice();
-
                 // Start negotiations
                 evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
                 evAgent.removeBehaviour(new EVRequestCharging(evAgent));
