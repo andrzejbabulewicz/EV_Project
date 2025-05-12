@@ -91,6 +91,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 ACLMessage replyConfirm = msg.createReply();
                 replyConfirm.setPerformative(ACLMessage.INFORM);
                 replyConfirm.setContent(String.format(Locale.US, "%s:%s", evAgent.getCurrentLocation().name(), evAgent.getCpId()));
+                myAgent.send(replyConfirm);
                 //send to cs
             }
 

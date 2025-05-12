@@ -61,7 +61,7 @@ public class ChargingStationAgent extends Agent {
         }
         registerInDF();
 
-        addBehaviour(new TickerBehaviour(this,10000) {
+        addBehaviour(new TickerBehaviour(this,15000) {
             @Override
             protected void onTick() {
                 realTime++;
