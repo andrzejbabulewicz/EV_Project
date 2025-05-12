@@ -82,6 +82,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
                 if (reply != null) {
                     replies.add(reply);
+                    System.out.printf("[%s]: received a message from %s\n", myAgent.getLocalName(), reply.getSender().getLocalName());
                 } else {
                     block(100); // Pause a bit to avoid CPU overload
                 }

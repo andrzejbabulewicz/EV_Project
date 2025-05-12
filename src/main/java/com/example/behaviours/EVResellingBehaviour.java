@@ -82,7 +82,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                     reply.setPerformative(ACLMessage.PROPOSE);
                     reply.setContent(String.format(Locale.US, "%.2f", minAfterFirstBid));
                     myAgent.send(reply);
-                    System.out.println("Proposed counter: " + firstBid + ", will accept >= " + minAfterFirstBid);
+                    System.out.println("Proposed counter: " + firstBid);
                 }
             }
             else if(msg.getPerformative()==ACLMessage.ACCEPT_PROPOSAL)
