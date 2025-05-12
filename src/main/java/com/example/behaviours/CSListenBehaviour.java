@@ -122,7 +122,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
             }
 
         }
-        else if(msg.getPerformative() == ACLMessage.INFORM)
+        else if(msg.getPerformative() == ACLMessage.INFORM && msg.getConversationId().equals("csInform"))
         {
             ACLMessage sth = msg.createReply();
             String[] parts = msg.getContent().split(":");
