@@ -111,6 +111,15 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 reply.setContent(String.format(Locale.US, "%s:%s", evBuyer.getLocalName(),evAgent.getCpId()));
                 myAgent.send(reply);
 
+
+                // Receive confirmation from CS
+                MessageTemplate template = MessageTemplate.MatchPerformative(ACLMessage.CONFIRM);
+                ACLMessage message = myAgent.blockingReceive(template, 2000);
+                if (message != null) {
+                    evAgent.removeBehaviour(this);
+                    evAgent.addBehaviour(new EVRequestCharging(evAgent));
+                }
+
             }
 
         } else {

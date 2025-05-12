@@ -213,9 +213,13 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                     Map.Station station = Map.getStationByName(parts[0]);
                     evAgent.setCpId(parts[1]);
 
-                    evAgent.travelToCp(station);
-                    evAgent.addBehaviour(new EVListenSellingBehaviour(evAgent)); // MERGE NEEDED
-                    return;
+                    messageTemplate = MessageTemplate.MatchPerformative(ACLMessage.CONFIRM);
+                    message = myAgent.blockingReceive(messageTemplate, 2000);
+                    if (message != null) {
+                        evAgent.travelToCp(station);
+                        evAgent.addBehaviour(new EVListenSellingBehaviour(evAgent));
+                        return;
+                    }
                 }
                 tryCount++;
             }
