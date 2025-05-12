@@ -120,7 +120,41 @@ public class CSListenBehaviour extends CyclicBehaviour {
                             "; proposal expired.");
                 }
             }
-        } else {
+
+        }
+        else if(msg.getPerformative() == ACLMessage.INFORM)
+        {
+            ACLMessage sth = msg.createReply();
+            String[] parts = msg.getContent().split(":");
+            String name = parts[0];
+            String cpName = parts[1];
+
+            AID senderAID = msg.getSender();
+
+            for(ChargingPoint cp : csAgent.chargingPoints)
+            {
+                if(cp.getCpId().equals(cpName))
+                {
+                    AID Aid = new AID(name, AID.ISLOCALNAME);
+                    for(AID a : cp.chargingQueue)
+                    {
+                        if(a.equals(senderAID))
+                        {
+                            a=Aid;
+                            ACLMessage confirm = new ACLMessage();
+                            confirm.setPerformative(ACLMessage.CONFIRM);
+                            confirm.addReceiver(Aid);
+                            confirm.addReceiver(senderAID);
+                            confirm.setContent(String.format(Locale.US, "Confirming the change\n"));
+                            myAgent.send(confirm);
+                        }
+                    }
+                }
+            }
+
+        }
+        else
+        {
             block();
         }
     }

@@ -1,5 +1,6 @@
 package com.example.behaviours;
 
+import com.example.agents.ChargingStationAgent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -19,6 +20,11 @@ public class EVResellingBehaviour extends CyclicBehaviour {
     @Override
     public void action() {
         // Listen only for CFP messages (negotiation start)
+        String conversationId="propose_from_buyer";
+//        MessageTemplate mt = MessageTemplate.and(
+//                MessageTemplate.MatchPerformative(ACLMessage.PROPOSE),
+//                MessageTemplate.MatchConversationId(conversationId)
+//        );
         MessageTemplate temp1 = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.CFP),
                 MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
         MessageTemplate temp2 = MessageTemplate.or(temp1, MessageTemplate.MatchPerformative(ACLMessage.INFORM));
@@ -35,7 +41,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 evAgent.removeBehaviour(this);
             }
 
-            else if(msg.getPerformative()==ACLMessage.PROPOSE || msg.getPerformative()==ACLMessage.CFP)
+            else if((msg.getPerformative()==ACLMessage.PROPOSE && msg.getConversationId().equals(conversationId))|| msg.getPerformative()==ACLMessage.CFP)
             {
                 AID buyer = msg.getSender();
                 String content = msg.getContent().trim();
@@ -80,6 +86,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                     evAgent.setMinAfterFirstBid(minAfterFirstBid); // store for use in next round
 
                     reply.setPerformative(ACLMessage.PROPOSE);
+                    reply.setConversationId("propose_from_seller");
                     reply.setContent(String.format(Locale.US, "%.2f", minAfterFirstBid));
                     myAgent.send(reply);
                     System.out.println("Proposed counter: " + firstBid);
@@ -92,7 +99,18 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 replyConfirm.setPerformative(ACLMessage.INFORM);
                 replyConfirm.setContent(String.format(Locale.US, "%s:%s", evAgent.getCurrentLocation().name(), evAgent.getCpId()));
                 myAgent.send(replyConfirm);
-                //send to cs
+
+
+                AID csInform = new AID(evAgent.getCurrentLocation().name(), AID.ISLOCALNAME);
+                ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
+                reply.setPerformative(ACLMessage.INFORM);
+                reply.addReceiver(csInform);
+
+                AID evBuyer = msg.getSender();
+
+                reply.setContent(String.format(Locale.US, "%s:%s", evBuyer.getLocalName(),evAgent.getCpId()));
+                myAgent.send(reply);
+
             }
 
         } else {
