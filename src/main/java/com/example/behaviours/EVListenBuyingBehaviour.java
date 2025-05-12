@@ -147,23 +147,34 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
                     try {
                         counterBid = Double.parseDouble(reply.getContent().trim());
-                        if (negotiationRound == 1)
-                            newBids.add(new AbstractMap.SimpleEntry<>(
-                                    sender,
-                                    generateNextBid(initialBid, counterBid)
-                            ));
+                        if (negotiationRound == 1) {
+                            double newBid = generateNextBid(initialBid, counterBid);
+                            if (newBid != -1)
+                            {
+                                newBids.add(new AbstractMap.SimpleEntry<>(
+                                        sender,
+                                        generateNextBid(initialBid, counterBid)
+                                ));
+
+                            System.out.printf("[%s] Received bid from %s: %.2f, calculated counter: %.2f\n",
+                                    evAgent.getLocalName(), sender.getLocalName(), counterBid, newBid);
+                            }
+                        }
                         else
                         {
                             double newBid = generateNextBid(getValueByKey(oldBids, sender), counterBid);
                             if (newBid != -1)
+                            {
                                 newBids.add(new AbstractMap.SimpleEntry<>(
                                         sender,
                                         newBid
                                 ));
+                                System.out.printf("[%s] Received bid from %s: %.2f, calculated counter: %.2f\n",
+                                        evAgent.getLocalName(), sender.getLocalName(), counterBid, newBid);
+                            }
                         }
 
-                        System.out.printf("[%s] Received bid from %s: %.2f, calculated counter: %.2f\n",
-                                evAgent.getLocalName(), sender.getLocalName(), counterBid, newBids.getLast().getValue());
+
 
                     } catch (NumberFormatException e) {
                         System.out.println(evAgent.getLocalName()
