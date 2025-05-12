@@ -74,10 +74,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
             System.out.printf("[%s] negotiations, round %d\n", myAgent.getLocalName(), negotiationRound);
             long start = System.currentTimeMillis();
 
-            MessageTemplate temp1 = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),
-                    MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL));
-            MessageTemplate template = MessageTemplate.or(temp1,
-                    MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
+            MessageTemplate template = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
 
             // Wait for replies
             while (System.currentTimeMillis() - start < timeout) {
@@ -181,25 +178,25 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                                 + " ERROR received bad message during negotiation");
                     }
                 }
-                else if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-
-                    // Price accepted by the seller EV
-                    if (negotiationRound == 1) {
-                        finalPrice = initialBid;
-                    }
-                    else {
-                        for (java.util.Map.Entry<AID, Double> entry : oldBids) {
-                            if (entry.getKey().equals(finalSeller)) {
-                                finalPrice = entry.getValue();
-                            }
-                        }
-                    }
-                    finalSeller = reply.getSender();
-
-                    System.out.printf("[%s] Proposal accepted by %s: %.2f\n",
-                            evAgent.getLocalName(), finalSeller.getLocalName(), finalPrice);
-                    break;
-                }
+//                else if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+//
+//                    // Price accepted by the seller EV
+//                    if (negotiationRound == 1) {
+//                        finalPrice = initialBid;
+//                    }
+//                    else {
+//                        for (java.util.Map.Entry<AID, Double> entry : oldBids) {
+//                            if (entry.getKey().equals(finalSeller)) {
+//                                finalPrice = entry.getValue();
+//                            }
+//                        }
+//                    }
+//                    finalSeller = reply.getSender();
+//
+//                    System.out.printf("[%s] Proposal accepted by %s: %.2f\n",
+//                            evAgent.getLocalName(), finalSeller.getLocalName(), finalPrice);
+//                    break;
+//                }
             }
 
             // Send proposals and rejection messages
@@ -244,7 +241,8 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                 }
                 tryCount++;
             }
-        } else {
+        }
+        else {
 
             // If all rejected then go back to asking CS's
             evAgent.setCurrentCommunication(evAgent.getCurrentLocation());
