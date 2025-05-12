@@ -123,12 +123,8 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
                         try {
                             counterBid = Double.parseDouble(reply.getContent());
-                            if (counterBid == finalPrice) {
-                                finalYes.addReceiver(reply.getSender());
-                            }
-                            else {
+                            if (counterBid != finalPrice)
                                 finalNo.addReceiver(reply.getSender());
-                            }
 
                         } catch (NumberFormatException e) {
                             System.out.println(evAgent.getLocalName()
@@ -137,6 +133,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
                     }
                 }
+                finalYes.addReceiver(finalSeller);
                 evAgent.send(finalYes);
                 evAgent.send(finalNo);
                 break;
