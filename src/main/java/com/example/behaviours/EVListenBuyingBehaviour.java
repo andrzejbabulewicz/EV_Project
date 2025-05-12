@@ -36,7 +36,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         batteryRatio = evAgent.getBatteryRatio();
         myName = evAgent.getLocalName();
         negotiationRound = 1;
-        maxRounds = (int)(1 + chargingUrgency * 5); // HARDCODED MAX 5
+        maxRounds = (int)(1 + chargingUrgency * 5); // HARDCODED 1 - 5
 
         System.out.printf("[%s] Init values: meanPrice=%.2f, urgency=%.2f, money=%.2f\n",
                 myAgent.getLocalName(), meanPrice, chargingUrgency, money);
@@ -99,7 +99,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                     if (reply.getPerformative() == ACLMessage.PROPOSE) {
 
                         try {
-                            /// TEMPORARY IF STATEMENT, LATER USE UTILITY
+                            // TEMPORARY IF STATEMENT, LATER USE UTILITY
                             counterBid = Double.parseDouble(reply.getContent().trim());
                             double utility = calculateUtility(counterBid);
                             if (counterBid < finalPrice) {
@@ -184,12 +184,18 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                 else if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
 
                     // Price accepted by the seller EV
-                    finalSeller = reply.getSender();
-                    for (java.util.Map.Entry<AID, Double> entry : oldBids) {
-                        if (entry.getKey().equals(finalSeller)) {
-                            finalPrice = entry.getValue();
+                    if (negotiationRound == 1) {
+                        finalPrice = initialBid;
+                    }
+                    else {
+                        for (java.util.Map.Entry<AID, Double> entry : oldBids) {
+                            if (entry.getKey().equals(finalSeller)) {
+                                finalPrice = entry.getValue();
+                            }
                         }
                     }
+                    finalSeller = reply.getSender();
+
                     System.out.printf("[%s] Proposal accepted by %s: %.2f\n",
                             evAgent.getLocalName(), finalSeller.getLocalName(), finalPrice);
                     break;
