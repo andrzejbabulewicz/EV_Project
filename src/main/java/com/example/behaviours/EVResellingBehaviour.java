@@ -104,6 +104,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
 
                 AID csInform = new AID(evAgent.getCurrentLocation().name(), AID.ISLOCALNAME);
                 ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
+                reply.setConversationId("csInform");
                 reply.setPerformative(ACLMessage.INFORM);
                 reply.addReceiver(csInform);
 

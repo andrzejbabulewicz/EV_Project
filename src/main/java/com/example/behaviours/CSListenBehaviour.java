@@ -38,7 +38,12 @@ public class CSListenBehaviour extends CyclicBehaviour {
         double basePrice = csAgent.getBasePrice();
         boolean was_offered = false;
 
-        ACLMessage msg = myAgent.receive();
+
+        MessageTemplate temp1 = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+                MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+
+        ACLMessage msg = myAgent.receive(temp1);
+        //ACLMessage msg = myAgent.receive();
         if (msg != null && msg.getPerformative() == ACLMessage.REQUEST) {
             String content = msg.getContent().trim();
             int slot;
@@ -122,7 +127,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
             }
 
         }
-        else if(msg.getPerformative() == ACLMessage.INFORM && msg.getConversationId().equals("csInform"))
+        else if(msg!=null && msg.getPerformative() == ACLMessage.INFORM && msg.getConversationId() == "csInform" )
         {
             ACLMessage sth = msg.createReply();
             String[] parts = msg.getContent().split(":");
@@ -136,19 +141,15 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 if(cp.getCpId().equals(cpName))
                 {
                     AID Aid = new AID(name, AID.ISLOCALNAME);
-                    for(AID a : cp.chargingQueue)
+
+                    for(int i=0;i<cp.chargingQueue.length;i++)
                     {
-                        if(a.equals(senderAID))
+                        if(cp.chargingQueue[i].getLocalName().equals(name))
                         {
-                            a=Aid;
-                            ACLMessage confirm = new ACLMessage();
-                            confirm.setPerformative(ACLMessage.CONFIRM);
-                            confirm.addReceiver(Aid);
-                            confirm.addReceiver(senderAID);
-                            confirm.setContent(String.format(Locale.US, "Confirming the change\n"));
-                            myAgent.send(confirm);
+                            cp.chargingQueue[i] = Aid;
                         }
                     }
+
                 }
             }
 
