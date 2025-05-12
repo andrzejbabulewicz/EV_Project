@@ -97,6 +97,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 System.out.printf("accept proposal received\n");
                 ACLMessage replyConfirm = msg.createReply();
                 replyConfirm.setPerformative(ACLMessage.INFORM);
+                replyConfirm.setConversationId("csInform");
                 replyConfirm.setContent(String.format(Locale.US, "%s:%s", evAgent.getCurrentLocation().name(), evAgent.getCpId()));
                 myAgent.send(replyConfirm);
 
