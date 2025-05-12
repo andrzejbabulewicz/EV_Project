@@ -78,7 +78,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                     System.out.println("Accepted counter-offer from " + buyer.getLocalName());
                 } else {
                     // Round 1: propose a counter-offer
-                    double minAfterFirstBid = offer + 0.25 * (maxPrice - offer); // conservative bump
+                    double minAfterFirstBid = offer + 0.4 * (maxPrice - offer); // conservative bump
                     evAgent.setMinAfterFirstBid(minAfterFirstBid); // store for use in next round
 
                     reply.setPerformative(ACLMessage.PROPOSE);
