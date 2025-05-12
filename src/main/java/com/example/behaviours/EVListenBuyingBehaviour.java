@@ -153,10 +153,14 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                                     generateNextBid(initialBid, counterBid)
                             ));
                         else
-                            newBids.add(new AbstractMap.SimpleEntry<>(
-                                    sender,
-                                    generateNextBid(getValueByKey(oldBids, sender), counterBid)
-                            ));
+                        {
+                            double newBid = getValueByKey(oldBids, sender);
+                            if (newBid != -1)
+                                newBids.add(new AbstractMap.SimpleEntry<>(
+                                        sender,
+                                        generateNextBid(newBid, counterBid)
+                                ));
+                        }
 
                         System.out.printf("[%s] Received bid from %s: %.2f, calculated counter: %.2f\n",
                                 evAgent.getLocalName(), sender.getLocalName(), counterBid, newBids.getLast().getValue());
