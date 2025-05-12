@@ -123,7 +123,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
                         try {
                             counterBid = Double.parseDouble(reply.getContent());
-                            if (reply.getSender() == finalSeller) {
+                            if (counterBid == finalPrice) {
                                 finalYes.addReceiver(reply.getSender());
                             }
                             else {
