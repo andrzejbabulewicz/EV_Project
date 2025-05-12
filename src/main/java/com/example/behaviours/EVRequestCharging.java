@@ -28,7 +28,7 @@ public class EVRequestCharging extends CyclicBehaviour {
 
             request.addReceiver(evAgent.getCurrentCommunicationAid());
 
-            request.setContent("1");
+            request.setContent(String.format("%d", evAgent.getSlotToRequest()));
 
             evAgent.send(request);
             System.out.println(evAgent.getLocalName() + " sent request to " + evAgent.getCurrentCommunication());
@@ -69,6 +69,11 @@ public class EVRequestCharging extends CyclicBehaviour {
 
                         evAgent.removeBehaviour(this);
                         //evAgent.addBehaviour(new EVListenSellingBehaviour(evAgent));
+
+                        if(evAgent.getSlotToRequest() == 2)
+                        {
+                            evAgent.setSlotToRequest(1);
+                        }
                         evAgent.addBehaviour(new EVResellingBehaviour(evAgent));
                         return;
                     }
@@ -84,6 +89,7 @@ public class EVRequestCharging extends CyclicBehaviour {
 
                             // Start negotiations
                             evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
+
                             evAgent.removeBehaviour(this);
                             return;
                         }

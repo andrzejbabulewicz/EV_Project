@@ -129,20 +129,33 @@ public class CSListenBehaviour extends CyclicBehaviour {
         }
         else if(msg!=null && msg.getPerformative() == ACLMessage.INFORM && msg.getConversationId() == "csInform" )
         {
+            System.out.printf("%s: received confirmation\n", myAgent.getLocalName());
             ACLMessage sth = msg.createReply();
             String[] parts = msg.getContent().split(":");
             int slot_no = Integer.parseInt(parts[0]);
             String name = parts[1];
-            String cpName = parts[2];
+            String cpName = parts[2].trim();
 
             AID senderAID = msg.getSender();
 
-            for(ChargingPoint cp : csAgent.chargingPoints)
+           //for(ChargingPoint cp : csAgent.chargingPoints)
+            for(int i=0;i<csAgent.chargingPoints.size();i++)
             {
-                if(cp.getCpId().equals(cpName))
+                System.out.printf("%s: is in the loop, charging point: %s, cpname received: %s\n", myAgent.getLocalName(), csAgent.chargingPoints.get(i).getCpId(), cpName);
+                if(csAgent.chargingPoints.get(i).getCpId().equals(cpName))
                 {
+                    System.out.printf("%s: ????????????????\n", myAgent.getLocalName());
                     AID Aid = new AID(name, AID.ISLOCALNAME);
-                    cp.chargingQueue[slot_no] = Aid;
+
+                    csAgent.chargingPoints.get(i).chargingQueue[slot_no] = Aid;
+
+                    ACLMessage msgConfirm = msg.createReply();
+//                    msgConfirm.setSender(senderAID);
+//                    msgConfirm.setSender(Aid);
+
+                    msgConfirm.setPerformative(ACLMessage.CONFIRM);
+                    msgConfirm.setContent("confirmed");
+                    myAgent.send(msgConfirm);
                 }
             }
 

@@ -61,6 +61,8 @@ public class EVAgent extends Agent {
     @Getter
     private List<AID> stations = new ArrayList<>();
 
+    @Setter int slotToRequest=1;
+
     @Override
     protected void setup() {
 

@@ -152,6 +152,17 @@ public class Main
                             r.nextDouble() // chargingUrgency
                     });
 
+            AgentController ev8 = container.createNewAgent("ev8", "com.example.agents.EVAgent",
+                    new Object[]{
+                            chargerTypes.CCS2, // type
+                            2.0,
+                            19.00,     // batteryLevel
+                            100.0,    // maxBatteryLevel
+                            stations.get(1), // currentLocation
+                            500.0, // totalMoney
+                            r.nextDouble() // chargingUrgency
+                    });
+
             cs1.start();
             cs2.start();
             cs3.start();
@@ -163,6 +174,7 @@ public class Main
             ev5.start();
             ev6.start();
             ev7.start();
+            ev8.start();
 
 
             System.out.println("CS, CP, and EV agents have been started.");
