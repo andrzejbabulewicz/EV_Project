@@ -269,7 +269,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
     private double generateNextBid(double lastBid, double sellerCounter) {
         double maxWillingToPay = Math.min(
                 money,
-                chargingUrgency * 1.6 * meanPrice
+                chargingUrgency * 1.7 * meanPrice
         );
 
         // Calculate a more controlled increase
