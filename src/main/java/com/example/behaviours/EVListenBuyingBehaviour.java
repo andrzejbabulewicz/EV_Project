@@ -99,9 +99,10 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                     if (reply.getPerformative() == ACLMessage.PROPOSE) {
 
                         try {
+                            /// TEMPORARY IF STATEMENT, LATER USE UTILITY
                             counterBid = Double.parseDouble(reply.getContent().trim());
                             double utility = calculateUtility(counterBid);
-                            if (utility > bestUtility) {
+                            if (counterBid < finalPrice) {
                                 bestUtility = utility;
                                 finalPrice = counterBid;
                                 finalSeller = reply.getSender();
@@ -253,16 +254,15 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
         // Normalized price impact (lower price = better utility)
         double priceImpact = 1.0 - (offerPrice / (meanPrice + 1e-5));
-        double utility = (urgencyWeight * chargingUrgency)
+        return (urgencyWeight * chargingUrgency)
                 + (priceWeight * priceImpact)
                 + (batteryWeight * (1 - batteryRatio));
-        return utility;
     }
 
     private double generateInitialBid() {
         double baseWillingness = (1 + chargingUrgency) * meanPrice;
         // Make sure bid is affordable
-        return Math.min(money, baseWillingness * 0.8);
+        return Math.min(money, baseWillingness * 0.6);
     }
 
     private double generateNextBid(double lastBid, double sellerCounter) {

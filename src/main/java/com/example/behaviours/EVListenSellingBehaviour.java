@@ -36,13 +36,6 @@ public class EVListenSellingBehaviour extends CyclicBehaviour {
                 evAgent.addBehaviour(new EVRoamBehaviour(evAgent));
                 evAgent.removeBehaviour(this);
             }
-            else if (message.getPerformative() == ACLMessage.REQUEST) {
-                beginNegotiation(message.getSender());
-            }
         }
-    }
-
-    private void beginNegotiation(AID agent) {
-        // Negotiation from the selling side
     }
 }
