@@ -54,9 +54,9 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 double maxPrice = minPrice * 2;
                 double chargeFactor = (100 - evAgent.getBatteryLevel()) / 100.0;
 
-                System.out.printf("----------------min price: %.2f, max price: %.2f, charge factor: %.2f\n", minPrice, maxPrice, chargeFactor);
+                System.out.printf("[%s]----------------min price: %.2f, max price: %.2f, charge factor: %.2f\n",evAgent.getLocalName(), minPrice, maxPrice, chargeFactor);
 
-                double firstBid = minPrice + (maxPrice - minPrice) * chargeFactor;
+                double firstBid = offer + (maxPrice - offer) * chargeFactor;
 
                 System.out.printf("[%s] Received CFP from %s: %.2f, calculated first bid: %.2f\n",
                         myAgent.getLocalName(), buyer.getLocalName(), offer, firstBid);
@@ -78,11 +78,11 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                     System.out.println("Accepted counter-offer from " + buyer.getLocalName());
                 } else {
                     // Round 1: propose a counter-offer
-                    double minAfterFirstBid = offer + 0.4 * (maxPrice - offer); // conservative bump
+                    double minAfterFirstBid = offer + 0.4 * Math.abs(maxPrice - offer); // conservative bump
                     evAgent.setMinAfterFirstBid(minAfterFirstBid); // store for use in next round
 
                     reply.setPerformative(ACLMessage.PROPOSE);
-                    reply.setContent(String.format(Locale.US, "%.2f", firstBid));
+                    reply.setContent(String.format(Locale.US, "%.2f", minAfterFirstBid));
                     myAgent.send(reply);
                     System.out.println("Proposed counter: " + firstBid + ", will accept >= " + minAfterFirstBid);
                 }
