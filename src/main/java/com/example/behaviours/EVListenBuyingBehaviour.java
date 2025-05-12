@@ -260,7 +260,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
     }
 
     private double generateInitialBid() {
-        double baseWillingness = chargingUrgency * meanPrice;
+        double baseWillingness = (1 + chargingUrgency) * meanPrice;
         // Make sure bid is affordable
         return Math.min(money, baseWillingness * 0.8);
     }
