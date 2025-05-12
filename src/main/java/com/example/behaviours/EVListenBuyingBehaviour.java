@@ -139,7 +139,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
             // Collect proposals and calculate next bids
             for (ACLMessage reply : replies) {
-                if (reply.getPerformative() == ACLMessage.PROPOSE) {
+                if (reply.getPerformative() == ACLMessage.PROPOSE && reply.getConversationId().equals("propose_from_seller")) {
                     double counterBid;
                     AID sender = reply.getSender();
 
@@ -181,6 +181,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
             for (java.util.Map.Entry<AID, Double> entry : newBids) {
                 if (entry.getValue() != -1) {
                     msg = new ACLMessage(ACLMessage.PROPOSE);
+                    msg.setConversationId("propose_from_buyer");
                     msg.setContent(String.format(Locale.US, "%.2f", entry.getValue()));
                     msg.addReceiver(entry.getKey());
                     evAgent.send(msg);
