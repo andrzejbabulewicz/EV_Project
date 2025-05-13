@@ -104,13 +104,13 @@ public class EVAgent extends Agent {
         batteryLevel -= batteryPerKm * road.distance();
         currentLocation = road.from().name() == currentLocation.name() ? road.to() : road.from();
 
-        System.out.println(getLocalName() + " traveling to " + currentLocation.name());
+        System.out.println("[" + getLocalName() + "]" + " traveling to " + currentLocation.name());
         try {
             sleep(road.distance() * 500);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        System.out.println(getLocalName() + " arrived at " + currentLocation.name());
+        System.out.println("[" + getLocalName() + "]" + " arrived at " + currentLocation.name());
     }
 
     public void travelToCp(Station station) {

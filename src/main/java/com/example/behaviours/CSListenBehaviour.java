@@ -59,7 +59,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 return;
             }
 
-            System.out.println(myAgent.getLocalName() + " received request for slot " + slot);
+            System.out.println("[" + myAgent.getLocalName() + "]" + " received request for slot " + slot);
 
             // Try to find a free charging point for that slot
             ChargingPoint chosen = null;
@@ -77,9 +77,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 double price = csAgent.calculateFactoredPrice(slot);
                 reply.setPerformative(ACLMessage.PROPOSE);
                 reply.setContent(String.format(Locale.US,"%d:%.2f:%s", slot, price, chosen.getCpId()));
-                System.out.println(myAgent.getLocalName() +
-                        " proposing slot " + slot + " at price " + price +
-                        " on CP " + chosen.getCpId());
+                System.out.printf("[%s] proposing slot %d at price $%.2f on [%s]\n",myAgent.getLocalName(), slot, price, chosen.getCpId());
                 was_offered = true;
             }
             else
@@ -100,8 +98,8 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 }
                 double price = csAgent.calculateFactoredPrice(slot);
                 reply.setContent(String.format(Locale.US ,"%d:%.2f:%s", slot, price, sj.toString()));
-                System.out.println(myAgent.getLocalName() +
-                        " rejecting slot " + slot + "; occupied by " + sj);
+                System.out.println("[" + myAgent.getLocalName() + "]" +
+                        " rejecting slot " + slot + "; occupied by [" + sj + "]");
             }
             myAgent.send(reply);
             if(was_offered==true)
@@ -114,7 +112,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
                     // Got confirmation—book it
                     AID evAID = confirm.getSender();
                     chosen.chargingQueue[slot] = evAID;
-                    System.out.println(getAgent().getLocalName() +
+                    System.out.println("[" + getAgent().getLocalName() + "]" +
                             " confirmed booking of slot " + slot +
                             " on CP " + chosen.getCpId() +
                             " for EV " + evAID.getLocalName());
@@ -129,7 +127,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
         }
         else if(msg!=null && msg.getPerformative() == ACLMessage.INFORM && msg.getConversationId() == "csInform" )
         {
-            System.out.printf("%s: received confirmation\n", myAgent.getLocalName());
+            //System.out.printf("%s: received confirmation\n", myAgent.getLocalName());
             ACLMessage sth = msg.createReply();
             String[] parts = msg.getContent().split(":");
             int slot_no = Integer.parseInt(parts[0]);
@@ -141,10 +139,10 @@ public class CSListenBehaviour extends CyclicBehaviour {
            //for(ChargingPoint cp : csAgent.chargingPoints)
             for(int i=0;i<csAgent.chargingPoints.size();i++)
             {
-                System.out.printf("%s: is in the loop, charging point: %s, cpname received: %s\n", myAgent.getLocalName(), csAgent.chargingPoints.get(i).getCpId(), cpName);
+                //System.out.printf("%s: is in the loop, charging point: %s, cpname received: %s\n", myAgent.getLocalName(), csAgent.chargingPoints.get(i).getCpId(), cpName);
                 if(csAgent.chargingPoints.get(i).getCpId().equals(cpName))
                 {
-                    System.out.printf("%s: ????????????????\n", myAgent.getLocalName());
+                    //System.out.printf("%s: ????????????????\n", myAgent.getLocalName());
                     AID Aid = new AID(name, AID.ISLOCALNAME);
 
                     csAgent.chargingPoints.get(i).chargingQueue[slot_no] = Aid;

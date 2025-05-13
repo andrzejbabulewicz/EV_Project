@@ -31,7 +31,7 @@ public class EVRequestCharging extends CyclicBehaviour {
             request.setContent(String.format("%d", evAgent.getSlotToRequest()));
 
             evAgent.send(request);
-            System.out.println(evAgent.getLocalName() + " sent request to " + evAgent.getCurrentCommunication());
+            System.out.println("[" + evAgent.getLocalName() + "]" + " sent request to " + evAgent.getCurrentCommunication());
 
             // wait for a proposal or a list of AIDs
             MessageTemplate messageTemplate = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE),
@@ -58,7 +58,7 @@ public class EVRequestCharging extends CyclicBehaviour {
                         evAgent.setChargingPrice(Double.parseDouble(parts[1]));
 
 
-                        System.out.println(evAgent.getLocalName() + " accepts slot " + parts[0] + " at " +
+                        System.out.println("[" + evAgent.getLocalName() + "]" + " accepts slot " + parts[0] + " at " +
                                 parts[2] + ", " + evAgent.getCurrentCommunication() +
                                 ", for $" + evAgent.getChargingPrice());
 
