@@ -6,8 +6,10 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.core.AID;
 import com.example.agents.EVAgent;
+import lombok.ToString;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public class EVResellingBehaviour extends CyclicBehaviour {
     private final EVAgent evAgent;
@@ -94,36 +96,40 @@ public class EVResellingBehaviour extends CyclicBehaviour {
             }
             else if(msg.getPerformative()==ACLMessage.ACCEPT_PROPOSAL)
             {
-                System.out.printf("accept proposal received\n");
-                ACLMessage replyConfirm = msg.createReply();
-                replyConfirm.setPerformative(ACLMessage.INFORM);
-                replyConfirm.setConversationId("csInform");
-                replyConfirm.setContent(String.format(Locale.US, "%s:%s", evAgent.getCurrentLocation().name(), evAgent.getCpId()));
-                myAgent.send(replyConfirm);
+
+                if(Objects.equals(msg.getConversationId(), Integer.toString(evAgent.getSlot())))
+                {
+                    System.out.printf("accept proposal received\n");
+                    ACLMessage replyConfirm = msg.createReply();
+                    replyConfirm.setPerformative(ACLMessage.INFORM);
+                    replyConfirm.setConversationId("csInform");
+                    replyConfirm.setContent(String.format(Locale.US, "%s:%s", evAgent.getCurrentLocation().name(), evAgent.getCpId()));
+                    myAgent.send(replyConfirm);
 
 
-                AID csInform = new AID(evAgent.getCurrentLocation().name(), AID.ISLOCALNAME);
-                ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
-                reply.setConversationId("csInform");
-                reply.setPerformative(ACLMessage.INFORM);
-                reply.addReceiver(csInform);
+                    AID csInform = new AID(evAgent.getCurrentLocation().name(), AID.ISLOCALNAME);
+                    ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
+                    reply.setConversationId("csInform");
+                    reply.setPerformative(ACLMessage.INFORM);
+                    reply.addReceiver(csInform);
 
-                AID evBuyer = msg.getSender();
+                    AID evBuyer = msg.getSender();
 
-                reply.setContent(String.format(Locale.US, "%d:%s:%s",evAgent.getSlot(), evBuyer.getLocalName(),evAgent.getCpId()));
-                myAgent.send(reply);
-
-
-                // Receive confirmation from CS
-                MessageTemplate template = MessageTemplate.MatchPerformative(ACLMessage.CONFIRM);
-                ACLMessage message = myAgent.blockingReceive(template, 2000);
-                if (message != null) {
-                    evAgent.removeBehaviour(this);
-                    evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
+                    reply.setContent(String.format(Locale.US, "%d:%s:%s", evAgent.getSlot(), evBuyer.getLocalName(), evAgent.getCpId()));
+                    myAgent.send(reply);
 
 
-                    evAgent.sortStations(evAgent.getCurrentLocation());
-                    evAgent.addBehaviour(new EVRequestCharging(evAgent));
+                    // Receive confirmation from CS
+                    MessageTemplate template = MessageTemplate.MatchPerformative(ACLMessage.CONFIRM);
+                    ACLMessage message = myAgent.blockingReceive(template, 2000);
+                    if (message != null) {
+                        evAgent.removeBehaviour(this);
+                        evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
+
+
+                        evAgent.sortStations(evAgent.getCurrentLocation());
+                        evAgent.addBehaviour(new EVRequestCharging(evAgent));
+                    }
                 }
 
             }
