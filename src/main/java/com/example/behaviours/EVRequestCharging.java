@@ -107,6 +107,7 @@ public class EVRequestCharging extends CyclicBehaviour {
                         for (String s : names) {
                             evAgent.getEvInQueue().add(new AID(s, AID.ISLOCALNAME));
                         }
+                        evAgent.setSlot(Integer.parseInt(parts[0]));
                     }
 
                     currentPrice = Double.parseDouble(parts[1]);
