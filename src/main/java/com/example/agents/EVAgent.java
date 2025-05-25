@@ -144,6 +144,8 @@ public class EVAgent extends Agent {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        tooLateForNegotiation = false;
     }
 
     public void sortStations(Station currentStation) {
