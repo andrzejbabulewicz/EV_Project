@@ -22,7 +22,6 @@ import static java.lang.Thread.sleep;
 @Getter
 public class EVAgent extends Agent {
 
-
     private chargerTypes type;
 
     // EV specification
@@ -35,13 +34,15 @@ public class EVAgent extends Agent {
     // Total money
     private double totalMoney;
 
-    // Parameters when buying
+    // Parameter for negotiation
     private double chargingUrgency; // 0.0 - 1.0 predefined
 
+    // For initial bid
     @Setter private double sumOfPrices = 0;
     @Setter private double pricesCount = 0;
     @Setter private double meanPrice = 0;
 
+    // Physical location
     private Station currentLocation;
 
     @Setter private Station currentCommunication;
@@ -61,7 +62,8 @@ public class EVAgent extends Agent {
     @Getter
     private List<AID> stations = new ArrayList<>();
 
-    @Setter int slotToRequest=1;
+    @Setter int slotToRequest = 1;
+    @Setter boolean tooLateForNegotiation = false;
 
     @Override
     protected void setup() {
@@ -115,7 +117,7 @@ public class EVAgent extends Agent {
 
     public void travelToCp(Station station) {
         // After getting a spot, travel to it
-        int distance = sortedStations.get(station);
+        long distance = sortedStations.get(station);
         batteryLevel -= batteryPerKm * distance;
         currentLocation = getStationAtIndex(stationIndex);
         sortedStations.clear();
@@ -176,7 +178,7 @@ public class EVAgent extends Agent {
             }
         }
 
-        // Sort the distances by value (distance)
+        // Sort the distances by distance
         sortedStations =  distances.entrySet().stream()
                 .sorted(java.util.Map.Entry.comparingByValue())
                 .collect(LinkedHashMap::new,

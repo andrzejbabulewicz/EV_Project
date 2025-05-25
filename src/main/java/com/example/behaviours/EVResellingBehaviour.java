@@ -119,7 +119,10 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 ACLMessage message = myAgent.blockingReceive(template, 2000);
                 if (message != null) {
                     evAgent.removeBehaviour(this);
-                    evAgent.setSlotToRequest(2);
+                    evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
+
+
+                    evAgent.sortStations(evAgent.getCurrentLocation());
                     evAgent.addBehaviour(new EVRequestCharging(evAgent));
                 }
 

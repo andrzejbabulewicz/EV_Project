@@ -23,11 +23,8 @@ public class EVRequestCharging extends CyclicBehaviour {
         while (tryCounter < 2) {
             // send request for a slot
             ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-            Station station = evAgent.getStationAtIndex(evAgent.getStationIndex());
-            AID stationId = new AID(station.name(), AID.ISLOCALNAME);
 
             request.addReceiver(evAgent.getCurrentCommunicationAid());
-
             request.setContent(String.format("%d", evAgent.getSlotToRequest()));
 
             evAgent.send(request);
@@ -67,13 +64,12 @@ public class EVRequestCharging extends CyclicBehaviour {
                             evAgent.travelToCp(evAgent.getCurrentCommunication());
                         }
 
-                        evAgent.removeBehaviour(this);
-                        //evAgent.addBehaviour(new EVListenSellingBehaviour(evAgent));
-
-                        if(evAgent.getSlotToRequest() == 2)
+                        if(evAgent.getSlotToRequest() > 1)
                         {
                             evAgent.setSlotToRequest(1);
                         }
+
+                        evAgent.removeBehaviour(this);
                         evAgent.addBehaviour(new EVResellingBehaviour(evAgent));
                         return;
                     }
@@ -91,23 +87,29 @@ public class EVRequestCharging extends CyclicBehaviour {
                             evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
 
                             evAgent.removeBehaviour(this);
-                            return;
                         }
-                        break;
                     }
 
                 } else {
                     // Handle rejected communication
                     String[] parts = content.split(":");
 
-                    currentPrice = Double.parseDouble(parts[1]);
-                    String[] names = parts[2].split(",");
+                    if (parts.length != 3)
+                        System.out.println("INCORRECT MESSAGE FORMAT");
 
-
-                    // Add ev's available for negotiations
-                    for (String s : names) {
-                        evAgent.getEvInQueue().add(new AID(s, AID.ISLOCALNAME));
+                    if (Integer.parseInt(parts[0]) == -1) {
+                        evAgent.setTooLateForNegotiation(true);
                     }
+                    else {
+                        String[] names = parts[2].split(",");
+
+                        // Add ev's available for negotiations
+                        for (String s : names) {
+                            evAgent.getEvInQueue().add(new AID(s, AID.ISLOCALNAME));
+                        }
+                    }
+
+                    currentPrice = Double.parseDouble(parts[1]);
 
                     if (currentPrice != 0)
                         evAgent.sumNextPrice(currentPrice);
@@ -116,27 +118,38 @@ public class EVRequestCharging extends CyclicBehaviour {
                     {
                         evAgent.calculateMeanPrice();
 
-                        // Start negotiations
-                        evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
-                        evAgent.removeBehaviour(this);
-                        return;
+                        if (evAgent.isTooLateForNegotiation()) {
+                            // Too late for negotiations, find a spot at later time
+                            evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
+                        }
+                        else {
+                            // Start negotiations
+                            evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
+                            evAgent.removeBehaviour(this);
+                        }
                     }
-                    break;
+
                 }
+                break;
             }
             else {
                 tryCounter++;
             }
+        }
 
+        // No response after multiple requests
+        if (!evAgent.askNextStation())
+        {
+            evAgent.calculateMeanPrice();
 
-            // No response after multiple requests
-            if (!evAgent.askNextStation())
-            {
-                evAgent.calculateMeanPrice();
+            if (evAgent.isTooLateForNegotiation()) {
+                // Too late for negotiations, find a spot at later time
+                evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
+            }
+            else {
                 // Start negotiations
                 evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
-                evAgent.removeBehaviour(new EVRequestCharging(evAgent));
-                return;
+                evAgent.removeBehaviour(this);
             }
         }
     }

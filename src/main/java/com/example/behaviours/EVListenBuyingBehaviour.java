@@ -53,7 +53,8 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         List<java.util.Map.Entry<AID, Double>> oldBids = new ArrayList<>();
         List<java.util.Map.Entry<AID, Double>> newBids = new ArrayList<>();
 
-        long timeout = 4000;
+        long startTime = System.currentTimeMillis();
+        long timeout = 3000;
         int count = allEVs.size();
         double initialBid = generateInitialBid();
 
@@ -71,13 +72,13 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         // Main negotiation loop
         while (true) {
 
+            long startOfRound = System.currentTimeMillis();
             System.out.printf("[%s] negotiations, round %d\n", myAgent.getLocalName(), negotiationRound);
-            long start = System.currentTimeMillis();
 
             MessageTemplate template = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
 
             // Wait for replies
-            while (System.currentTimeMillis() - start < timeout) {
+            while (System.currentTimeMillis() - startOfRound < timeout) {
                 ACLMessage reply = evAgent.receive(template);
 
                 if (reply != null) {
@@ -93,6 +94,10 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
                 // Collect proposals and decide which to buy
                 double counterBid;
+
+                if (replies.isEmpty())
+                    break;
+
                 for (ACLMessage reply : replies) {
                     if (reply.getPerformative() == ACLMessage.PROPOSE) {
 
@@ -115,25 +120,8 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
                 // Send final replies
                 ACLMessage finalYes = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-                ACLMessage finalNo = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-                for (ACLMessage reply : replies) {
-                    if (reply.getPerformative() == ACLMessage.PROPOSE) {
-
-                        try {
-                            counterBid = Double.parseDouble(reply.getContent());
-                            if (counterBid != finalPrice)
-                                finalNo.addReceiver(reply.getSender());
-
-                        } catch (NumberFormatException e) {
-                            System.out.println(evAgent.getLocalName()
-                                    + " ERROR received bad message during negotiation");
-                        }
-
-                    }
-                }
                 finalYes.addReceiver(finalSeller);
                 evAgent.send(finalYes);
-                evAgent.send(finalNo);
                 break;
             }
 
@@ -213,29 +201,30 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                     Map.Station station = Map.getStationByName(parts[0]);
                     evAgent.setCpId(parts[1]);
 
-                    messageTemplate = MessageTemplate.MatchPerformative(ACLMessage.CONFIRM);
-                    message = myAgent.blockingReceive(messageTemplate, 2000);
-                    if (message != null) {
-                        evAgent.travelToCp(station);
-                        evAgent.setEvInQueue(new ArrayList<>());
-
-                        evAgent.addBehaviour(new EVResellingBehaviour(evAgent));
-                        return;
+                    if (finalSeller != null)
+                    {
+                        float time = (float)(System.currentTimeMillis() - startTime) / 1000;
+                        System.out.printf("[%s]: finalized the negotiations with [%s], it took [%.3f] seconds\n", evAgent.getLocalName(), finalSeller.getLocalName(), time);
                     }
+
+                    evAgent.travelToCp(station);
+                    evAgent.setEvInQueue(new ArrayList<>());
+
+                    evAgent.addBehaviour(new EVResellingBehaviour(evAgent));
+                    return;
                 }
                 tryCount++;
             }
         }
-        else {
 
-            // If all rejected then go back to asking CS's
-            evAgent.setCurrentCommunication(evAgent.getCurrentLocation());
-            evAgent.setCurrentCommunicationAid(new AID(evAgent.getCurrentCommunication().name(), AID.ISLOCALNAME));
-            evAgent.setEvInQueue(new ArrayList<>());
+        // If all rejected then go back to asking CS's
+        evAgent.setCurrentCommunication(evAgent.getCurrentLocation());
+        evAgent.setCurrentCommunicationAid(new AID(evAgent.getCurrentCommunication().name(), AID.ISLOCALNAME));
+        evAgent.setEvInQueue(new ArrayList<>());
 
-            evAgent.sortStations(evAgent.getCurrentLocation());
-            evAgent.addBehaviour(new EVRequestCharging(evAgent));
-        }
+        evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
+        evAgent.sortStations(evAgent.getCurrentLocation());
+        evAgent.addBehaviour(new EVRequestCharging(evAgent));
 
     }
 
