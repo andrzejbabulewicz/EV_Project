@@ -10,6 +10,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import com.example.behaviours.CSListenBehaviour;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class ChargingStationAgent extends Agent {
 
     @Getter
     public int realTime =0;
+    public LocalTime nextSlotStartTime;
     public List<ChargingPoint> chargingPoints;
 
 
@@ -61,11 +63,14 @@ public class ChargingStationAgent extends Agent {
         }
         registerInDF();
 
+        nextSlotStartTime = LocalTime.now().plusSeconds(20);
+
         addBehaviour(new TickerBehaviour(this,20000) {
             @Override
             protected void onTick() {
                 realTime++;
                 //send to all evs INFORM
+                nextSlotStartTime = LocalTime.now().plusSeconds(20);
 
                 //List<AID> occupants = new ArrayList<>();
                 for (ChargingPoint cp : chargingPoints) {
