@@ -146,6 +146,7 @@ public class EVAgent extends Agent {
         }
 
         tooLateForNegotiation = false;
+        slotToRequest = 1;
     }
 
     public void sortStations(Station currentStation) {
