@@ -93,6 +93,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
                     sj.add(evAid.getLocalName());
                 }
                 double price = csAgent.calculateFactoredPrice(slot);
+                //jesli czas na negocjacje za krotki to slot = -1
                 reply.setContent(String.format(Locale.US ,"%d:%.2f:%s", slot, price, sj.toString()));
                 System.out.println("[" + myAgent.getLocalName() + "]" +
                         " rejecting slot " + slot + "; occupied by [" + sj + "]");

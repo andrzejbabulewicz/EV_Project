@@ -58,7 +58,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 }
                 double minPrice = evAgent.getChargingPrice();
                 double maxPrice = minPrice * 2;
-                double chargeFactor = (100 - evAgent.getBatteryLevel()) / 100.0;
+                double chargeFactor = (100 - evAgent.getBatteryLevel()) / 100.0;  //charging urgency zmienic!!!!!!!
 
                 System.out.printf("[%s]----------------min price: %.2f, max price: %.2f, charge factor: %.2f\n",evAgent.getLocalName(), minPrice, maxPrice, chargeFactor);
 
