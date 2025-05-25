@@ -14,11 +14,7 @@ import jade.core.Agent;
 import java.lang.Cloneable;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.StringJoiner;
-
+import java.util.*;
 
 
 public class CSListenBehaviour extends CyclicBehaviour {
@@ -125,7 +121,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
             }
 
         }
-        else if(msg!=null && msg.getPerformative() == ACLMessage.INFORM && msg.getConversationId() == "csInform" )
+        else if(msg!=null && msg.getPerformative() == ACLMessage.INFORM && Objects.equals(msg.getConversationId(), "csInform"))
         {
             //System.out.printf("%s: received confirmation\n", myAgent.getLocalName());
             ACLMessage sth = msg.createReply();

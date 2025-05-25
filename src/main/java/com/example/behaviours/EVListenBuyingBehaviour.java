@@ -54,7 +54,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         List<java.util.Map.Entry<AID, Double>> newBids = new ArrayList<>();
 
         long startTime = System.currentTimeMillis();
-        long timeout = 3000;
+        long timeout = 2000;
         int count = allEVs.size();
         double initialBid = generateInitialBid();
 
@@ -63,7 +63,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
         // Send initial offer
         ACLMessage msg = new ACLMessage(ACLMessage.CFP);
-        msg.setContent(String.format(Locale.US,"%.2f", initialBid));
+        msg.setContent(String.format(Locale.US, "%.2f", initialBid));
         for (AID ev : allEVs) {
             msg.addReceiver(ev);
         }
@@ -173,8 +173,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                     msg.setContent(String.format(Locale.US, "%.2f", entry.getValue()));
                     msg.addReceiver(entry.getKey());
                     evAgent.send(msg);
-                }
-                else {
+                } else {
                     rejectMsg.addReceiver(entry.getKey());
                 }
             }
@@ -187,24 +186,22 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         }
 
 
-
         if (finalPrice != Double.MAX_VALUE) {
 
             // Get info from seller EV about the spot and travel to it
             while (tryCount < 2) {
                 MessageTemplate messageTemplate = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
-                ACLMessage message = myAgent.blockingReceive(messageTemplate, 2000);
+                ACLMessage message = myAgent.blockingReceive(messageTemplate, 1000);
 
-                if (message != null) {
+                if (message != null && message.getConversationId().equals("csInform")) {
                     String content = message.getContent();
                     String[] parts = content.split(":");
                     Map.Station station = Map.getStationByName(parts[0]);
                     evAgent.setCpId(parts[1]);
 
-                    if (finalSeller != null)
-                    {
-                        float time = (float)(System.currentTimeMillis() - startTime) / 1000;
-                        System.out.printf("[%s]: finalized the negotiations with [%s], it took [%.3f] seconds\n", evAgent.getLocalName(), finalSeller.getLocalName(), time);
+                    if (finalSeller != null) {
+                        float time = (float) (System.currentTimeMillis() - startTime) / 1000;
+                        System.out.printf("[%s]: finalized the negotiations with %s, it took %.3f seconds\n", evAgent.getLocalName(), finalSeller.getLocalName(), time);
                     }
 
                     evAgent.travelToCp(station);
@@ -216,6 +213,8 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                 tryCount++;
             }
         }
+
+        System.out.printf("[%s]: receives no counter-bids or someone else got the switch message first\n", evAgent.getLocalName());
 
         // If all rejected then go back to asking CS's
         evAgent.setCurrentCommunication(evAgent.getCurrentLocation());
@@ -236,6 +235,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         }
         return -1;
     }
+
     public double calculateUtility(double offerPrice) {
         // Weights: Tune as needed
         double urgencyWeight = 0.5;
@@ -281,23 +281,4 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
         return -1; // Still too much
     }
-
-
-    //        double maxWillingToPay = Math.min(
-//                money,
-//                chargingUrgency * 1.7 * meanPrice
-//        );
-//
-//        // Calculate a more controlled increase
-//        double bidGap = sellerCounter - lastBid;
-//        double increase = 0.05 * meanPrice + 0.1 * bidGap; // Small bump
-//
-//        double nextBid = lastBid + increase;
-//
-//        // Only bid if the next bid is still below max willing to pay
-//        if (nextBid <= maxWillingToPay && nextBid < sellerCounter) {
-//            return nextBid;
-//        } else {
-//            return -1; // Give up
-//        }
 }
