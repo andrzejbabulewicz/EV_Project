@@ -130,6 +130,7 @@ public class EVAgent extends Agent {
         }
         System.out.println(getLocalName() + " arrived at " + currentLocation.name() + " to charge");
 
+        sortStations(currentLocation);
     }
 
     public void charge(int time) {
