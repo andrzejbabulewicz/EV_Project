@@ -91,8 +91,6 @@ public class Main
 
             Random r = new Random();
             //------------Initialize Electric Vehicles---------------
-
-
             for (int i = 0; i < noOfEv; i++) {
                 double batteryLevel = 15 + 25 * r.nextDouble();
                 String evName = String.format("ev%d", i + 1);
