@@ -32,6 +32,7 @@ public class EVRoamBehaviour extends CyclicBehaviour {
         else {
             // Choose destination and roam randomly
             List<Road> possibleRoads = new ArrayList<>();
+
             for (Road r : Map.getRoads()) {
                 if (r.from().name() == evAgent.getCurrentLocation().name())
                     possibleRoads.add(r);

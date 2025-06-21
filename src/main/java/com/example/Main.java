@@ -22,6 +22,14 @@ public class Main
 {
     public static void main(String[] args)
     {
+        // SIMULATION PARAMETERS
+        int noOfCp = 11;
+        int noOfCs = 7;
+        int noOfEv = 10;
+        int numberOfExtraRoads = 2;
+
+        List<AgentController> csAgents = new ArrayList<>();
+        List<AgentController> evAgents = new ArrayList<>();
 
         Runtime rt = Runtime.instance();
 
@@ -30,7 +38,11 @@ public class Main
 
         ContainerController container = rt.createMainContainer(p);
 
-
+        //-----------Initialize Map Structure-------------
+        for (int i = 0; i < noOfCs; i++) {
+            Map.getStations().add(new Station(String.format("CS%d", i + 1)));
+        }
+        Map.createRandomGraph(numberOfExtraRoads);
 
         List<Station> stations = Map.getStations();
 
@@ -40,143 +52,66 @@ public class Main
             exit(1);
         }
 
+        System.out.println("Map generated.");
+
         try
         {
             //-----------Initialize Charging Points-------------
-            ChargingPoint cp1 = new ChargingPoint("cp1", false);
-            ChargingPoint cp2 = new ChargingPoint("cp2", false);
-            ChargingPoint cp3 = new ChargingPoint("cp3", false);
-            ChargingPoint cp4 = new ChargingPoint("cp4", false);
-            ChargingPoint cp5 = new ChargingPoint("cp5", false);
-            ChargingPoint cp6 = new ChargingPoint("cp6", false);
+            ChargingPoint[] cpArray = new ChargingPoint[noOfCp];
+            for (int i = 0; i < noOfCp; i++){
+                String name = String.format("cp%d", i + 1);
+                cpArray[i] = new ChargingPoint("cp1", false);
+            }
 
             //------------Initialize Charging Stations---------------
-            AgentController cs1 = container.createNewAgent("cs1", "com.example.agents.ChargingStationAgent",
-                    new Object[]{
-                            stations.get(0), // Location
-                            new ArrayList<ChargingPoint>(){{    // List of Charging Points in Station
-                                add(cp1);
-                                add(cp2);
-                                add(cp3);
-                            }},
-                    });
-            AgentController cs2 = container.createNewAgent("cs2", "com.example.agents.ChargingStationAgent",
-                    new Object[]{
-                            stations.get(1), // Location
-                            new ArrayList<ChargingPoint>(){{    // List of Charging Points in Station
-                                add(cp4);
+            int index = 0;
+            int cpPerCS = noOfCp / noOfCs;
+            int remainder = noOfCp % noOfCs;
 
-                            }},
-                    });
-            AgentController cs3 = container.createNewAgent("cs3", "com.example.agents.ChargingStationAgent",
-                    new Object[]{
-                            stations.get(2), // Location
-                            new ArrayList<ChargingPoint>(){{    // List of Charging Points in Station
-                                add(cp5);
-                                add(cp6);
-                            }},
-                    });
+            for (int i = 0; i < noOfCs; i++){
+                List<ChargingPoint> cpList = new ArrayList<>();
+                int thisCp = cpPerCS + (i < remainder ? 1 : 0);
+
+                for (int j = 0; j < thisCp; j++){
+                    cpList.add(cpArray[index++]);
+                }
+
+                String name = String.format("cs%d", i + 1);
+
+                csAgents.add(container.createNewAgent(
+                        name,
+                        "com.example.agents.ChargingStationAgent",
+                        new Object[]{
+                                stations.get(i), // Location
+                                cpList      // The fairly distributed list of CPs
+                        }
+                ));
+            }
 
 
             Random r = new Random();
             //------------Initialize Electric Vehicles---------------
-            AgentController ev1 = container.createNewAgent("ev1", "com.example.agents.EVAgent",
-                    new Object[]{
-                            chargerTypes.CCS2, // type
-                            2.0,
-                            15.0,     // batteryLevel
-                            100.0,    // maxBatteryLevel
-                            stations.get(0), // currentLocation
-                            500.0, // totalMoney
-                            r.nextDouble() // chargingUrgency
-                    });
-            AgentController ev2 = container.createNewAgent("ev2", "com.example.agents.EVAgent",
-                    new Object[]{
-                            chargerTypes.Type2, // type
-                            3.5,
-                            20.0,     // batteryLevel
-                            100.0,    // maxBatteryLevel
-                            stations.get(1), // currentLocation
-                            500.0, // totalMoney
-                            r.nextDouble() // chargingUrgency
-
-                    });
-            AgentController ev3 = container.createNewAgent("ev3", "com.example.agents.EVAgent",
-                    new Object[]{
-                            chargerTypes.CCS2, // type
-                            2.0,
-                            25.0,     // batteryLevel
-                            100.0,    // maxBatteryLevel
-                            stations.get(2), // currentLocation
-                            500.0, // totalMoney
-                            r.nextDouble() // chargingUrgency
-                    });
-            AgentController ev4 = container.createNewAgent("ev4", "com.example.agents.EVAgent",
-                    new Object[]{
-                            chargerTypes.CCS2, // type
-                            2.0,
-                            17.0,     // batteryLevel
-                            100.0,    // maxBatteryLevel
-                            stations.get(0), // currentLocation
-                            500.0, // totalMoney
-                            r.nextDouble() // chargingUrgency
-                    });
-            AgentController ev5 = container.createNewAgent("ev5", "com.example.agents.EVAgent",
-                    new Object[]{
-                            chargerTypes.CCS2, // type
-                            2.0,
-                            21.0,     // batteryLevel
-                            100.0,    // maxBatteryLevel
-                            stations.get(1), // currentLocation
-                            500.0, // totalMoney
-                            r.nextDouble() // chargingUrgency
-                    });
-            AgentController ev6 = container.createNewAgent("ev6", "com.example.agents.EVAgent",
-                    new Object[]{
-                            chargerTypes.CCS2, // type
-                            2.0,
-                            35.0,     // batteryLevel
-                            100.0,    // maxBatteryLevel
-                            stations.get(2), // currentLocation
-                            500.0, // totalMoney
-                            r.nextDouble() // chargingUrgency
-                    });
-            AgentController ev7 = container.createNewAgent("ev7", "com.example.agents.EVAgent",
-                    new Object[]{
-                            chargerTypes.CCS2, // type
-                            2.0,
-                            12.0,     // batteryLevel
-                            100.0,    // maxBatteryLevel
-                            stations.get(1), // currentLocation
-                            500.0, // totalMoney
-                            r.nextDouble() // chargingUrgency
-                    });
-
-            AgentController ev8 = container.createNewAgent("ev8", "com.example.agents.EVAgent",
-                    new Object[]{
-                            chargerTypes.CCS2, // type
-                            2.0,
-                            19.00,     // batteryLevel
-                            100.0,    // maxBatteryLevel
-                            stations.get(1), // currentLocation
-                            500.0, // totalMoney
-                            r.nextDouble() // chargingUrgency
-                    });
 
 
-            cs1.start();
-            cs2.start();
-            cs3.start();
+            for (int i = 0; i < noOfEv; i++) {
+                double batteryLevel = 15 + 25 * r.nextDouble();
+                String evName = String.format("ev%d", i + 1);
+                evAgents.add(container.createNewAgent(evName, "com.example.agents.EVAgent",
+                        new Object[]{
+                                chargerTypes.CCS2, // type
+                                2.0,        // batteryPerKm
+                                batteryLevel,     // batteryLevel
+                                100.0,    // maxBatteryLevel
+                                stations.get((int)(r.nextDouble()*noOfCs)), // currentLocation
+                                500.0, // totalMoney
+                                r.nextDouble() // chargingUrgency
+                        }));
+            }
 
-            ev1.start();
-            ev2.start();
-            ev3.start();
-            ev4.start();
-            ev5.start();
-            ev6.start();
-            ev7.start();
-            ev8.start();
-
+            for (int i = 0; i < noOfCs; i++)
+                csAgents.get(i).start();
+            for (int i = 0; i < noOfEv; i++)
+                evAgents.get(i).start();
 
             System.out.println("CS, CP, and EV agents have been started.");
         }
