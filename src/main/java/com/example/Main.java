@@ -12,6 +12,9 @@ import com.example.domain.Map;
 import com.example.domain.chargerTypes;
 import com.example.domain.Map.Station;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -23,9 +26,9 @@ public class Main
     public static void main(String[] args)
     {
         // SIMULATION PARAMETERS
-        int noOfCp = 11;
-        int noOfCs = 7;
-        int noOfEv = 10;
+        int noOfCp = 50;
+        int noOfCs = 10;
+        int noOfEv = 100;
         int numberOfExtraRoads = 2;
 
         List<AgentController> csAgents = new ArrayList<>();
@@ -37,6 +40,11 @@ public class Main
         p.setParameter(Profile.GUI, "true");
 
         ContainerController container = rt.createMainContainer(p);
+
+        WriteToFiles.writeToFileCS(noOfCp, noOfCs, noOfEv, numberOfExtraRoads);
+        WriteToFiles.writeToFileEV(noOfCp, noOfCs, noOfEv, numberOfExtraRoads);
+
+
 
         //-----------Initialize Map Structure-------------
         for (int i = 0; i < noOfCs; i++) {

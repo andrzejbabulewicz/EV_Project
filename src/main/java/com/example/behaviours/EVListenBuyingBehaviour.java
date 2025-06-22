@@ -68,6 +68,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
             msg.addReceiver(ev);
         }
         evAgent.send(msg);
+        evAgent.noOfNegotiations++;
 
         // Main negotiation loop
         while (true) {
@@ -123,6 +124,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                 finalYes.setConversationId(Integer.toString(evAgent.getSlot()));
                 finalYes.addReceiver(finalSeller);
                 evAgent.send(finalYes);
+
                 break;
             }
 
@@ -204,6 +206,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                         float time = (float) (System.currentTimeMillis() - startTime) / 1000;
                         System.out.printf("[%s]: finalized the negotiations with %s, it took %.3f seconds\n", evAgent.getLocalName(), finalSeller.getLocalName(), time);
                     }
+                    evAgent.noOfNegotiationsSucceeded++;
 
                     evAgent.travelToCp(station);
                     evAgent.setEvInQueue(new ArrayList<>());
@@ -224,6 +227,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
 
         evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
         evAgent.sortStations(evAgent.getCurrentLocation());
+        evAgent.setDidIncreaseSlot(true);
         evAgent.addBehaviour(new EVRequestCharging(evAgent));
 
     }

@@ -65,6 +65,15 @@ public class EVAgent extends Agent {
     @Setter int slotToRequest = 1;
     @Setter boolean tooLateForNegotiation = false;
 
+    @Setter public int noOfTrials = 0;
+    @Setter public int noOfDirectPurchases = 0;
+    @Setter public int noOfPostponedPurchases = 0;
+    @Setter public int noOfNegotiations = 0;
+    @Setter public int noOfNegotiationsFailed = 0;
+    @Setter public int noOfNegotiationsSucceeded = 0;
+    @Setter public boolean didIncreaseSlot = false;
+    @Setter public boolean didWriteToFile = false;
+
     @Override
     protected void setup() {
 
@@ -147,8 +156,7 @@ public class EVAgent extends Agent {
         }
 
         tooLateForNegotiation = false;
-
-        slotToRequest = 1;
+        slotToRequest=1;
     }
 
     public void sortStations(Station currentStation) {

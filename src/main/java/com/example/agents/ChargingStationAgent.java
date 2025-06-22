@@ -10,6 +10,9 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import com.example.behaviours.CSListenBehaviour;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +20,8 @@ import java.util.List;
 import com.example.domain.ChargingPoint;
 import jade.lang.acl.ACLMessage;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 public class ChargingStationAgent extends Agent {
     private AID stationId;
@@ -30,6 +35,14 @@ public class ChargingStationAgent extends Agent {
 
 
     @Getter public double basePrice = 10.00;
+
+
+    @Getter @Setter
+    public int noAccepted=0;
+    @Getter @Setter
+    public int noRejected=0;
+    @Getter @Setter
+    public int noTotal=0;
 
 
 
@@ -68,6 +81,13 @@ public class ChargingStationAgent extends Agent {
         addBehaviour(new TickerBehaviour(this,20000) {
             @Override
             protected void onTick() {
+                int noA = getNoAccepted();
+                int noR = getNoRejected();
+                int noT = getNoTotal();
+                noAccepted = 0;
+                noRejected = 0;
+                noTotal = 0;
+
                 realTime++;
                 //send to all evs INFORM
                 nextSlotStartTime = LocalTime.now().plusSeconds(20);
@@ -79,14 +99,29 @@ public class ChargingStationAgent extends Agent {
                     {
                         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
                         msg.addReceiver(ev);
-                        msg.setContent("You can start charging now");
+                        msg.setContent(String.format("%d", realTime)); //you can start charging now -> changed to slot no.
                         send(msg);
                         System.out.println(ev.getLocalName() + ": starts charging at " + cp.getCpId());
                     }
                 }
                 System.out.println(getLocalName() + "realTime = " + realTime);
+
+                if(realTime > 0 && realTime <=5)
+                {
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter("simulation_results_CS.csv", true))) {
+
+                        // Write header line with parameters
+                        writer.write(String.format("%d,%s,%d,%d,%d\n",realTime,getLocalName(),noT,noA,noR));
+
+                    } catch (IOException e) {
+                        System.err.println("Failed to write header to results file: " + e.getMessage());
+                    }
+                }
             }
+
         });
+
+
 
         addBehaviour(new CSListenBehaviour(this));
     }

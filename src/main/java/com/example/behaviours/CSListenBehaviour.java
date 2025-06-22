@@ -43,6 +43,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
         //ACLMessage msg = myAgent.receive();
         if (msg != null && msg.getPerformative() == ACLMessage.REQUEST) {
             String content = msg.getContent().trim();
+            csAgent.noTotal++;
             int slot;
             try {
 
@@ -102,6 +103,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 reply.setContent(String.format(Locale.US ,"%d:%.2f:%s", slot, price, sj.toString()));
                 System.out.println("[" + myAgent.getLocalName() + "]" +
                         " rejecting slot " + slot + "; occupied by [" + sj + "]");
+                csAgent.noRejected++;
             }
             myAgent.send(reply);
             if(was_offered==true)
@@ -118,6 +120,8 @@ public class CSListenBehaviour extends CyclicBehaviour {
                             " confirmed booking of slot " + slot +
                             " on CP " + chosen.getCpId() +
                             " for EV " + evAID.getLocalName());
+
+                    csAgent.noAccepted++;
                 } else {
                     // No confirmation arrived in time
                     System.out.println(getAgent().getLocalName() +

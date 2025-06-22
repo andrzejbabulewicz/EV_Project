@@ -8,6 +8,9 @@ import jade.core.AID;
 import com.example.agents.EVAgent;
 import lombok.ToString;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -37,8 +40,26 @@ public class EVResellingBehaviour extends CyclicBehaviour {
 
 
             if(msg.getPerformative() == ACLMessage.INFORM) {
+                int currentTime = Integer.parseInt(msg.getContent());
                 evAgent.charge(20);
                 System.out.println(evAgent.getLocalName() + " charged at " + evAgent.getCurrentLocation());
+                evAgent.setDidIncreaseSlot(false);
+
+                if(currentTime>=5 && !evAgent.didWriteToFile)
+                {
+                    evAgent.setDidWriteToFile(true);
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter("simulation_results_EV.csv", true))) {
+
+                        // Write header line with parameters
+                        //writer.write("EV_no,total_trials,negotiations,direct_purchases,negot_purchases,failed_purchases\n");
+                        writer.write(String.format("%s,%d,%d,%d,%d,%d\n",evAgent.getLocalName(),
+                                evAgent.getNoOfTrials(),evAgent.getNoOfNegotiations(),evAgent.getNoOfDirectPurchases(),
+                                evAgent.getNoOfNegotiationsSucceeded(),evAgent.getNoOfPostponedPurchases()));
+
+                    } catch (IOException e) {
+                        System.err.println("Failed to write header to results file: " + e.getMessage());
+                    }
+                }
                 evAgent.addBehaviour(new EVRoamBehaviour(evAgent));
                 evAgent.removeBehaviour(this);
             }

@@ -27,6 +27,7 @@ public class EVRequestCharging extends CyclicBehaviour {
             request.addReceiver(evAgent.getCurrentCommunicationAid());
             request.setContent(String.format("%d", evAgent.getSlotToRequest()));
 
+            evAgent.noOfTrials++;
             evAgent.send(request);
             System.out.println("[" + evAgent.getLocalName() + "]" + " sent request to " + evAgent.getCurrentCommunication());
 
@@ -59,6 +60,15 @@ public class EVRequestCharging extends CyclicBehaviour {
                                 parts[2] + ", " + evAgent.getCurrentCommunication() +
                                 ", for $" + evAgent.getChargingPrice());
 
+                        if(evAgent.didIncreaseSlot == true)
+                        {
+                            evAgent.noOfPostponedPurchases++;
+                            evAgent.setDidIncreaseSlot(false);
+                        }
+                        else
+                        {
+                            evAgent.noOfDirectPurchases++;
+                        }
                         // Travel to the charging point
                         if (!evAgent.getCurrentLocation().equals(evAgent.getCurrentCommunication())) {
                             evAgent.travelToCp(evAgent.getCurrentCommunication());
@@ -114,14 +124,16 @@ public class EVRequestCharging extends CyclicBehaviour {
 
                     if (currentPrice != 0)
                         evAgent.sumNextPrice(currentPrice);
-
+                    //System.out.println("-------- we are at" + evAgent.getStationIndex());
                     if (!evAgent.askNextStation())
                     {
+
                         evAgent.calculateMeanPrice();
 
                         if (evAgent.isTooLateForNegotiation()) {
                             // Too late for negotiations, find a spot at later time
                             evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
+                            evAgent.noOfNegotiationsFailed++;
                         }
                         else {
                             // Start negotiations
@@ -146,6 +158,7 @@ public class EVRequestCharging extends CyclicBehaviour {
             if (evAgent.isTooLateForNegotiation()) {
                 // Too late for negotiations, find a spot at later time
                 evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
+                evAgent.setDidIncreaseSlot(true);
             }
             else {
                 // Start negotiations
