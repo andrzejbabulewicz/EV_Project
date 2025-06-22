@@ -49,7 +49,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 evAgent.removeBehaviour(this);
             }
 
-            else if((msg.getPerformative()==ACLMessage.PROPOSE && msg.getConversationId().equals(conversationId))|| msg.getPerformative()==ACLMessage.CFP)
+            else if((msg.getPerformative()==ACLMessage.PROPOSE && msg.getConversationId().equals(conversationId)) || msg.getPerformative()==ACLMessage.CFP)
             {
                 AID buyer = msg.getSender();
                 String content = msg.getContent().trim();

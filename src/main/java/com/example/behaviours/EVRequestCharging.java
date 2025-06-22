@@ -62,38 +62,44 @@ public class EVRequestCharging extends CyclicBehaviour {
 
                             evAgent.send(confirm);
 
-                            evAgent.setSlot(Integer.parseInt(parts[0]));
-                            evAgent.setCpId(parts[2]);
-                            evAgent.setChargingPrice(Double.parseDouble(parts[1]));
+                            ACLMessage CS_confirm = new ACLMessage(ACLMessage.CONFIRM);
+                            CS_confirm.setConversationId("cs_confirm");
+                            CS_confirm  = myAgent.blockingReceive(2000);
+
+                            if (CS_confirm != null) {
+                                evAgent.setSlot(Integer.parseInt(parts[0]));
+                                evAgent.setCpId(parts[2]);
+                                evAgent.setChargingPrice(Double.parseDouble(parts[1]));
 
 
-                            System.out.println("[" + evAgent.getLocalName() + "]" + " accepts slot " + parts[0] + " at " +
-                                    parts[2] + ", " + evAgent.getCurrentCommunication() +
-                                    ", for $" + evAgent.getChargingPrice());
+                                System.out.println("[" + evAgent.getLocalName() + "]" + " accepts slot " + parts[0] + " at " +
+                                        parts[2] + ", " + evAgent.getCurrentCommunication() +
+                                        ", for $" + evAgent.getChargingPrice());
 
-                            if(evAgent.didIncreaseSlot == true)
-                            {
-                                evAgent.noOfPostponedPurchases++;
-                                evAgent.setDidIncreaseSlot(false);
+                                if(evAgent.didIncreaseSlot == true)
+                                {
+                                    evAgent.noOfPostponedPurchases++;
+                                    evAgent.setDidIncreaseSlot(false);
+                                }
+                                else
+                                {
+                                    evAgent.noOfDirectPurchases++;
+                                }
+                                // Travel to the charging point
+                                if (!evAgent.getCurrentLocation().equals(evAgent.getCurrentCommunication())) {
+                                    evAgent.travelToCp(evAgent.getCurrentCommunication());
+                                }
+
+
+                                if(evAgent.getSlotToRequest() > 1)
+                                {
+                                    evAgent.setSlotToRequest(1);
+                                }
+
+                                evAgent.removeBehaviour(this);
+                                evAgent.addBehaviour(new EVResellingBehaviour(evAgent));
+                                return;
                             }
-                            else
-                            {
-                                evAgent.noOfDirectPurchases++;
-                            }
-                            // Travel to the charging point
-                            if (!evAgent.getCurrentLocation().equals(evAgent.getCurrentCommunication())) {
-                                evAgent.travelToCp(evAgent.getCurrentCommunication());
-                            }
-
-
-                            if(evAgent.getSlotToRequest() > 1)
-                            {
-                                evAgent.setSlotToRequest(1);
-                            }
-
-                            evAgent.removeBehaviour(this);
-                            evAgent.addBehaviour(new EVResellingBehaviour(evAgent));
-                            return;
                         }
                         else {
                             // Price too high FOR NOW IT IS USELESS
