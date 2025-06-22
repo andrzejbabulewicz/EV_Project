@@ -57,11 +57,13 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 return;
             }
 
-            if(slot >= ((ChargingPoint.NUM_HOURS * 60) / ChargingPoint.SLOT_DURATION))
+            //if index is out of bounds
+            if(slot >= ((ChargingPoint.NUM_HOURS * 60) / ChargingPoint.SLOT_DURATION) || csAgent.dayEnd)
             {
                 ACLMessage replyEnd = msg.createReply();
                 replyEnd.setPerformative(ACLMessage.PROPOSE);
-                replyEnd.setContent("0");
+                replyEnd.setConversationId("cs_reply");
+                replyEnd.setContent("0:0:0");
                 myAgent.send(replyEnd);
                 return;
             }
@@ -79,6 +81,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
             }
 
             ACLMessage reply = msg.createReply();
+            reply.setConversationId("cs_reply");
             if (chosen != null)
             {
                 // Free slot found: propose a price
@@ -106,7 +109,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 }
                 double price = csAgent.calculateFactoredPrice(slot);
 
-                if(LocalTime.now().plusSeconds(17).isAfter(csAgent.nextSlotStartTime))
+                if(LocalTime.now().plusSeconds(15).isAfter(csAgent.nextSlotStartTime))
                 {
                     slot=-1;
                 }
@@ -130,6 +133,11 @@ public class CSListenBehaviour extends CyclicBehaviour {
                             " confirmed booking of slot " + slot +
                             " on CP " + chosen.getCpId() +
                             " for EV " + evAID.getLocalName());
+                    ACLMessage confirmBooking = confirm.createReply();
+                    confirmBooking.setPerformative(ACLMessage.CONFIRM);
+                    confirmBooking.setConversationId("cs_confirm");
+                    confirmBooking.setContent("Booking confirmed");
+                    myAgent.send(confirmBooking);
 
                     csAgent.noAccepted++;
                 } else {

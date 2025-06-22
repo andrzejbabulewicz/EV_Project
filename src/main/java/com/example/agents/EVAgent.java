@@ -110,13 +110,14 @@ public class EVAgent extends Agent {
 
     }
 
-    protected void takeDown() {
+    protected void takeDown()
+    {
         setDidWriteToFile(true);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("simulation_results_EV.csv", true))) {
 
             // Write header line with parameters
             //writer.write("EV_no,total_trials,negotiations,direct_purchases,negot_purchases,failed_purchases\n");
-            writer.write(String.format("%s,%d,%d,%d,%d,%d\n",getLocalName(),
+            writer.write(String.format(Locale.US,"%s,%d,%d,%d,%d,%d,%.2f\n",getLocalName(),
                     getNoOfTrials(),getNoOfNegotiations(),getNoOfDirectPurchases(),
                     getNoOfNegotiationsSucceeded(),getNoOfPostponedPurchases(),totalFrustration));
 
@@ -129,11 +130,6 @@ public class EVAgent extends Agent {
     public void increaseFrustration()
     {
         totalFrustration += chargingUrgency * slotToRequest;
-    }
-
-    public void terminate()
-    {
-        takeDown();
     }
 
     public void travel(Road road) {

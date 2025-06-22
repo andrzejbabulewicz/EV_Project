@@ -48,10 +48,11 @@ public class EVRequestCharging extends CyclicBehaviour {
                         // Handle CS proposal
                         String[] parts = content.split(":");
 
-                        // Termination signal from CS
-                        if (Integer.parseInt(parts[0]) == 0) {
-                            evAgent.terminate();
-                        }
+                    // Termination signal from CS
+                    if (Double.parseDouble(parts[0]) == 0) {
+                        evAgent.doDelete();
+                        return;
+                    }
 
                         if (Double.parseDouble(parts[1]) < evAgent.getTotalMoney()) {
                             // Accept the proposal
