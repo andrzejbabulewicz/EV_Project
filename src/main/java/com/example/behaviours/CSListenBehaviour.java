@@ -57,6 +57,16 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 return;
             }
 
+            if(slot >= ((ChargingPoint.NUM_HOURS * 60) / ChargingPoint.SLOT_DURATION))
+            {
+                ACLMessage replyEnd = msg.createReply();
+                replyEnd.setPerformative(ACLMessage.PROPOSE);
+                replyEnd.setContent("0");
+                myAgent.send(replyEnd);
+                return;
+            }
+
+
             System.out.println("[" + myAgent.getLocalName() + "]" + " received request for slot " + slot);
 
             // Try to find a free charging point for that slot
