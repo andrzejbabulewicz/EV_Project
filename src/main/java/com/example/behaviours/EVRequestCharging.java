@@ -42,116 +42,119 @@ public class EVRequestCharging extends CyclicBehaviour {
 
             if (message != null) {
                 String content = message.getContent();
-                if (message.getPerformative() == ACLMessage.PROPOSE) {
-                    // Handle CS proposal
-                    String[] parts = content.split(":");
+                if (message.getConversationId().equals("cs_reply"))
+                {
+                    if (message.getPerformative() == ACLMessage.PROPOSE) {
+                        // Handle CS proposal
+                        String[] parts = content.split(":");
 
-                    // Termination signal from CS
-                    if (Integer.parseInt(parts[0]) == 0) {
-                        evAgent.terminate();
-                    }
-
-                    if (Double.parseDouble(parts[1]) < evAgent.getTotalMoney()) {
-                        // Accept the proposal
-                        ACLMessage confirm = message.createReply();
-                        confirm.setPerformative(ACLMessage.CONFIRM);
-
-                        confirm.setContent("OK");
-
-                        evAgent.send(confirm);
-
-                        evAgent.setSlot(Integer.parseInt(parts[0]));
-                        evAgent.setCpId(parts[2]);
-                        evAgent.setChargingPrice(Double.parseDouble(parts[1]));
-
-
-                        System.out.println("[" + evAgent.getLocalName() + "]" + " accepts slot " + parts[0] + " at " +
-                                parts[2] + ", " + evAgent.getCurrentCommunication() +
-                                ", for $" + evAgent.getChargingPrice());
-
-                        if(evAgent.didIncreaseSlot == true)
-                        {
-                            evAgent.noOfPostponedPurchases++;
-                            evAgent.setDidIncreaseSlot(false);
-                        }
-                        else
-                        {
-                            evAgent.noOfDirectPurchases++;
-                        }
-                        // Travel to the charging point
-                        if (!evAgent.getCurrentLocation().equals(evAgent.getCurrentCommunication())) {
-                            evAgent.travelToCp(evAgent.getCurrentCommunication());
+                        // Termination signal from CS
+                        if (Integer.parseInt(parts[0]) == 0) {
+                            evAgent.terminate();
                         }
 
+                        if (Double.parseDouble(parts[1]) < evAgent.getTotalMoney()) {
+                            // Accept the proposal
+                            ACLMessage confirm = message.createReply();
+                            confirm.setPerformative(ACLMessage.CONFIRM);
 
-                        if(evAgent.getSlotToRequest() > 1)
-                        {
-                            evAgent.setSlotToRequest(1);
+                            confirm.setContent("OK");
+
+                            evAgent.send(confirm);
+
+                            evAgent.setSlot(Integer.parseInt(parts[0]));
+                            evAgent.setCpId(parts[2]);
+                            evAgent.setChargingPrice(Double.parseDouble(parts[1]));
+
+
+                            System.out.println("[" + evAgent.getLocalName() + "]" + " accepts slot " + parts[0] + " at " +
+                                    parts[2] + ", " + evAgent.getCurrentCommunication() +
+                                    ", for $" + evAgent.getChargingPrice());
+
+                            if(evAgent.didIncreaseSlot == true)
+                            {
+                                evAgent.noOfPostponedPurchases++;
+                                evAgent.setDidIncreaseSlot(false);
+                            }
+                            else
+                            {
+                                evAgent.noOfDirectPurchases++;
+                            }
+                            // Travel to the charging point
+                            if (!evAgent.getCurrentLocation().equals(evAgent.getCurrentCommunication())) {
+                                evAgent.travelToCp(evAgent.getCurrentCommunication());
+                            }
+
+
+                            if(evAgent.getSlotToRequest() > 1)
+                            {
+                                evAgent.setSlotToRequest(1);
+                            }
+
+                            evAgent.removeBehaviour(this);
+                            evAgent.addBehaviour(new EVResellingBehaviour(evAgent));
+                            return;
+                        }
+                        else {
+                            // Price too high FOR NOW IT IS USELESS
+
+                            if (currentPrice != 0)
+                                evAgent.sumNextPrice(currentPrice);
+
+                            if (!evAgent.askNextStation())
+                            {
+                                evAgent.calculateMeanPrice();
+
+                                // Start negotiations
+                                evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
+
+                                evAgent.removeBehaviour(this);
+                            }
                         }
 
-                        evAgent.removeBehaviour(this);
-                        evAgent.addBehaviour(new EVResellingBehaviour(evAgent));
-                        return;
-                    }
-                    else {
-                        // Price too high FOR NOW IT IS USELESS
+                    } else {
+                        // Handle rejected communication
+                        String[] parts = content.split(":");
+
+                        if (parts.length != 3)
+                            System.out.println("INCORRECT MESSAGE FORMAT");
+
+                        if (Integer.parseInt(parts[0]) == -1) {
+                            evAgent.setTooLateForNegotiation(true);
+                        }
+                        else {
+                            String[] names = parts[2].split(",");
+
+                            // Add ev's available for negotiations
+                            for (String s : names) {
+                                evAgent.getEvInQueue().add(new AID(s, AID.ISLOCALNAME));
+                            }
+                            evAgent.setSlot(Integer.parseInt(parts[0]));
+                        }
+
+                        currentPrice = Double.parseDouble(parts[1]);
 
                         if (currentPrice != 0)
                             evAgent.sumNextPrice(currentPrice);
-
+                        //System.out.println("-------- we are at" + evAgent.getStationIndex());
                         if (!evAgent.askNextStation())
                         {
+
                             evAgent.calculateMeanPrice();
 
-                            // Start negotiations
-                            evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
-
-                            evAgent.removeBehaviour(this);
+                            if (evAgent.isTooLateForNegotiation()) {
+                                // Too late for negotiations, find a spot at later time
+                                evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
+                                evAgent.noOfNegotiationsFailed++;
+                            }
+                            else {
+                                // Start negotiations
+                                evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
+                                evAgent.removeBehaviour(this);
+                            }
                         }
+
                     }
-
-                } else {
-                    // Handle rejected communication
-                    String[] parts = content.split(":");
-
-                    if (parts.length != 3)
-                        System.out.println("INCORRECT MESSAGE FORMAT");
-
-                    if (Integer.parseInt(parts[0]) == -1) {
-                        evAgent.setTooLateForNegotiation(true);
-                    }
-                    else {
-                        String[] names = parts[2].split(",");
-
-                        // Add ev's available for negotiations
-                        for (String s : names) {
-                            evAgent.getEvInQueue().add(new AID(s, AID.ISLOCALNAME));
-                        }
-                        evAgent.setSlot(Integer.parseInt(parts[0]));
-                    }
-
-                    currentPrice = Double.parseDouble(parts[1]);
-
-                    if (currentPrice != 0)
-                        evAgent.sumNextPrice(currentPrice);
-                    //System.out.println("-------- we are at" + evAgent.getStationIndex());
-                    if (!evAgent.askNextStation())
-                    {
-
-                        evAgent.calculateMeanPrice();
-
-                        if (evAgent.isTooLateForNegotiation()) {
-                            // Too late for negotiations, find a spot at later time
-                            evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
-                            evAgent.noOfNegotiationsFailed++;
-                        }
-                        else {
-                            // Start negotiations
-                            evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
-                            evAgent.removeBehaviour(this);
-                        }
-                    }
-
                 }
                 break;
             }
