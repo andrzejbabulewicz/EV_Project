@@ -83,10 +83,8 @@ public class EVRequestCharging extends CyclicBehaviour {
                         {
                             evAgent.calculateMeanPrice();
 
-                            // Start negotiations
-                            evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
-
-                            evAgent.removeBehaviour(this);
+                            // NO NEGOTIATIONS LOOK FOR LATER SPOT
+                            evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
                         }
                     }
 
@@ -119,15 +117,8 @@ public class EVRequestCharging extends CyclicBehaviour {
                     {
                         evAgent.calculateMeanPrice();
 
-                        if (evAgent.isTooLateForNegotiation()) {
-                            // Too late for negotiations, find a spot at later time
-                            evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
-                        }
-                        else {
-                            // Start negotiations
-                            evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
-                            evAgent.removeBehaviour(this);
-                        }
+                        // NO NEGOTIATIONS LOOK FOR LATER SPOT
+                        evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
                     }
 
                 }
@@ -143,15 +134,8 @@ public class EVRequestCharging extends CyclicBehaviour {
         {
             evAgent.calculateMeanPrice();
 
-            if (evAgent.isTooLateForNegotiation()) {
-                // Too late for negotiations, find a spot at later time
-                evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
-            }
-            else {
-                // Start negotiations
-                evAgent.addBehaviour(new EVListenBuyingBehaviour(evAgent));
-                evAgent.removeBehaviour(this);
-            }
+            // NO NEGOTIATIONS LOOK FOR LATER SPOT
+            evAgent.setSlotToRequest(evAgent.getSlotToRequest() + 1);
         }
     }
 
