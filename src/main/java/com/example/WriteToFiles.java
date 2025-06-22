@@ -42,7 +42,7 @@ public class WriteToFiles
             writer.write("\n");
 
             // Placeholder for column headers of simulation results
-            writer.write("EV_no,total_trials,negotiations,direct_purchases,negot_purchases,failed_purchases, total_frustration\n");
+            writer.write("EV_no,total_trials,negotiations,direct_purchases,negot_purchases,failed_purchases,total_frustration\n");
 
         } catch (IOException e) {
             System.err.println("Failed to write header to results file: " + e.getMessage());

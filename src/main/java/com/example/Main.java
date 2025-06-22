@@ -26,9 +26,9 @@ public class Main
     public static void main(String[] args)
     {
         // SIMULATION PARAMETERS
-        int noOfCp = 50;
-        int noOfCs = 10;
-        int noOfEv = 100;
+        int noOfCp = 6;
+        int noOfCs = 3;
+        int noOfEv = 12;
         int numberOfExtraRoads = 2;
 
         List<AgentController> csAgents = new ArrayList<>();

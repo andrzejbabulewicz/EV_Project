@@ -44,6 +44,9 @@ public class ChargingStationAgent extends Agent {
     @Getter @Setter
     public int noTotal=0;
 
+    @Getter @Setter
+    public boolean dayEnd = false;
+
 
 
     protected void setup() {
@@ -81,6 +84,13 @@ public class ChargingStationAgent extends Agent {
         addBehaviour(new TickerBehaviour(this,20000) {
             @Override
             protected void onTick() {
+                realTime++;
+                if(realTime >= ((ChargingPoint.NUM_HOURS * 60) / ChargingPoint.SLOT_DURATION))
+                {
+                    dayEnd = true;
+                    return;
+                }
+
                 int noA = getNoAccepted();
                 int noR = getNoRejected();
                 int noT = getNoTotal();
@@ -88,7 +98,7 @@ public class ChargingStationAgent extends Agent {
                 noRejected = 0;
                 noTotal = 0;
 
-                realTime++;
+
                 //send to all evs INFORM
                 nextSlotStartTime = LocalTime.now().plusSeconds(20);
 
@@ -106,7 +116,7 @@ public class ChargingStationAgent extends Agent {
                 }
                 System.out.println(getLocalName() + "realTime = " + realTime);
 
-                if(realTime > 0 && realTime <=5)
+                if(realTime > 0)
                 {
                     try (BufferedWriter writer = new BufferedWriter(new FileWriter("simulation_results_CS.csv", true))) {
 
