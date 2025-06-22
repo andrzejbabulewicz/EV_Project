@@ -13,6 +13,9 @@ import com.example.domain.Map.*;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 import static java.lang.Thread.sleep;
@@ -74,6 +77,8 @@ public class EVAgent extends Agent {
     @Setter public boolean didIncreaseSlot = false;
     @Setter public boolean didWriteToFile = false;
 
+    @Setter public double totalFrustration = 0;
+
     @Override
     protected void setup() {
 
@@ -106,7 +111,29 @@ public class EVAgent extends Agent {
     }
 
     protected void takeDown() {
+        setDidWriteToFile(true);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("simulation_results_EV.csv", true))) {
+
+            // Write header line with parameters
+            //writer.write("EV_no,total_trials,negotiations,direct_purchases,negot_purchases,failed_purchases\n");
+            writer.write(String.format("%s,%d,%d,%d,%d,%d\n",getLocalName(),
+                    getNoOfTrials(),getNoOfNegotiations(),getNoOfDirectPurchases(),
+                    getNoOfNegotiationsSucceeded(),getNoOfPostponedPurchases(),totalFrustration));
+
+        } catch (IOException e) {
+            System.err.println("Failed to write header to results file: " + e.getMessage());
+        }
         System.out.println(getLocalName() + " terminating.");
+    }
+
+    public void increaseFrustration()
+    {
+        totalFrustration += chargingUrgency * slotToRequest;
+    }
+
+    public void terminate()
+    {
+        takeDown();
     }
 
     public void travel(Road road) {
@@ -154,6 +181,8 @@ public class EVAgent extends Agent {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        increaseFrustration();
 
         tooLateForNegotiation = false;
         slotToRequest=1;

@@ -131,12 +131,12 @@ public class ChargingStationAgent extends Agent {
         int totalPoints = chargingPoints.size();
         int occupiedPoints = 0;
         for(ChargingPoint cp : chargingPoints)
+    {
+        if(cp.chargingQueue[slot]!=null)
         {
-            if(cp.chargingQueue[slot]!=null)
-            {
-                occupiedPoints++;
-            }
+            occupiedPoints++;
         }
+    }
 
         double occupancyFactor = 1+((double)occupiedPoints/totalPoints);
         double urgencyFactor = (slot-realTime <= 1) ? 1.2 : 1.0;

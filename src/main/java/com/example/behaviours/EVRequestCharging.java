@@ -9,6 +9,10 @@ import jade.lang.acl.ACLMessage;
 import com.example.agents.EVAgent;
 import jade.lang.acl.MessageTemplate;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class EVRequestCharging extends CyclicBehaviour {
 
     private final EVAgent evAgent;
@@ -42,6 +46,11 @@ public class EVRequestCharging extends CyclicBehaviour {
                     // Handle CS proposal
                     String[] parts = content.split(":");
 
+                    // Termination signal from CS
+                    if (Integer.parseInt(parts[0]) == 0) {
+                        evAgent.terminate();
+                    }
+
                     if (Double.parseDouble(parts[1]) < evAgent.getTotalMoney()) {
                         // Accept the proposal
                         ACLMessage confirm = message.createReply();
@@ -73,6 +82,7 @@ public class EVRequestCharging extends CyclicBehaviour {
                         if (!evAgent.getCurrentLocation().equals(evAgent.getCurrentCommunication())) {
                             evAgent.travelToCp(evAgent.getCurrentCommunication());
                         }
+
 
                         if(evAgent.getSlotToRequest() > 1)
                         {
