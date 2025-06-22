@@ -41,7 +41,7 @@ public class Map {
         for (int i = 1; i < shuffledStations.size(); i++) {
             Station currentStation = shuffledStations.get(i);
             Station targetStation = shuffledStations.get(random.nextInt(i));
-            int distance = 10 + (int)(90 * random.nextDouble()); // Random distance between 10 and 100
+            int distance = 6 + (int)(5 * random.nextDouble()); // Random distance between 10 and 100
             roads.add(new Road(currentStation, targetStation, distance));
         }
 

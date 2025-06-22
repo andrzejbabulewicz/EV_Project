@@ -12,7 +12,7 @@ public class ChargingPoint {
     private boolean isOccupied;
     private chargerTypes type;
     //private List<ScheduledCharging> chargingQueue = new ArrayList<>();
-    public static final int NUM_HOURS = 5;
+    public static final int NUM_HOURS = 2;
     public static final int SLOT_DURATION = 20;
 
     public int getSlotNo() {

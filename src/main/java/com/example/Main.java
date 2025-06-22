@@ -28,7 +28,7 @@ public class Main
         // SIMULATION PARAMETERS
         int noOfCp = 10;
         int noOfCs = 5;
-        int noOfEv = 100;
+        int noOfEv = 50;
         int numberOfExtraRoads = 2;
 
         List<AgentController> csAgents = new ArrayList<>();
@@ -100,7 +100,7 @@ public class Main
             Random r = new Random();
             //------------Initialize Electric Vehicles---------------
             for (int i = 0; i < noOfEv; i++) {
-                double batteryLevel = 15 + 25 * r.nextDouble();
+                double batteryLevel = 35 + 30 * r.nextDouble();
                 String evName = String.format("ev%d", i + 1);
                 evAgents.add(container.createNewAgent(evName, "com.example.agents.EVAgent",
                         new Object[]{

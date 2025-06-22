@@ -20,7 +20,7 @@ public class EVRoamBehaviour extends CyclicBehaviour {
 
         // Some randomness for the decision-making
         Random random = new Random();
-        if (evAgent.getBatteryLevel() < evAgent.getMaxBatteryLevel() * (0.2 + random.nextDouble() * 0.3)) {
+        if (evAgent.getBatteryLevel() < evAgent.getMaxBatteryLevel() * 0.5) {
 
             evAgent.setCurrentCommunication(evAgent.getCurrentLocation());
             evAgent.setCurrentCommunicationAid(new AID(evAgent.getCurrentCommunication().name(), AID.ISLOCALNAME));

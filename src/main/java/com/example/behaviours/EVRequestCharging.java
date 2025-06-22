@@ -31,7 +31,6 @@ public class EVRequestCharging extends CyclicBehaviour {
             request.addReceiver(evAgent.getCurrentCommunicationAid());
             request.setContent(String.format("%d", evAgent.getSlotToRequest()));
 
-            evAgent.noOfTrials++;
             evAgent.send(request);
             System.out.println("[" + evAgent.getLocalName() + "]" + " sent request to " + evAgent.getCurrentCommunication());
 
@@ -41,6 +40,8 @@ public class EVRequestCharging extends CyclicBehaviour {
             ACLMessage message = myAgent.blockingReceive(messageTemplate, 2000);
 
             if (message != null) {
+                evAgent.noOfTrials++;
+
                 String content = message.getContent();
                 if (message.getConversationId().equals("cs_reply"))
                 {

@@ -69,6 +69,8 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
         }
         evAgent.send(msg);
         evAgent.noOfNegotiations++;
+        evAgent.noOfTrials++;
+
 
         // Main negotiation loop
         while (true) {
