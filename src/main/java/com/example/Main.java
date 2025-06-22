@@ -26,9 +26,9 @@ public class Main
     public static void main(String[] args)
     {
         // SIMULATION PARAMETERS
-        int noOfCp = 6;
-        int noOfCs = 3;
-        int noOfEv = 12;
+        int noOfCp = 10;
+        int noOfCs = 5;
+        int noOfEv = 100;
         int numberOfExtraRoads = 2;
 
         List<AgentController> csAgents = new ArrayList<>();
@@ -68,7 +68,7 @@ public class Main
             ChargingPoint[] cpArray = new ChargingPoint[noOfCp];
             for (int i = 0; i < noOfCp; i++){
                 String name = String.format("cp%d", i + 1);
-                cpArray[i] = new ChargingPoint("cp1", false);
+                cpArray[i] = new ChargingPoint(name, false);
             }
 
             //------------Initialize Charging Stations---------------

@@ -53,7 +53,7 @@ public class Map {
             Station to = stations.get(random.nextInt(noOfStations));
 
             if (!from.equals(to) && !roadExists(from, to)) {
-                int distance = 10 + random.nextInt(91);
+                int distance = 6 + random.nextInt(5);
                 roads.add(new Road(from, to, distance));
                 addedEdges++;
             }

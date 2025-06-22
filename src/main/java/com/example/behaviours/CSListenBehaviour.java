@@ -65,6 +65,7 @@ public class CSListenBehaviour extends CyclicBehaviour {
                 replyEnd.setConversationId("cs_reply");
                 replyEnd.setContent("0:0:0");
                 myAgent.send(replyEnd);
+                csAgent.noRejected++;
                 return;
             }
 
@@ -125,7 +126,8 @@ public class CSListenBehaviour extends CyclicBehaviour {
                         MessageTemplate.MatchPerformative(ACLMessage.CONFIRM),
                         2000
                 );
-                if (confirm != null) {
+
+                if (confirm != null && chosen.getChargingSlots(slot) == null) {
                     // Got confirmation—book it
                     AID evAID = confirm.getSender();
                     chosen.chargingQueue[slot] = evAID;

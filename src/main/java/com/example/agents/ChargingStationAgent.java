@@ -85,7 +85,7 @@ public class ChargingStationAgent extends Agent {
             @Override
             protected void onTick() {
                 realTime++;
-                if(realTime >= ((ChargingPoint.NUM_HOURS * 60) / ChargingPoint.SLOT_DURATION))
+                if(realTime > ((ChargingPoint.NUM_HOURS * 60) / ChargingPoint.SLOT_DURATION))
                 {
                     dayEnd = true;
                     return;

@@ -12,7 +12,7 @@ public class ChargingPoint {
     private boolean isOccupied;
     private chargerTypes type;
     //private List<ScheduledCharging> chargingQueue = new ArrayList<>();
-    public static final int NUM_HOURS = 2;
+    public static final int NUM_HOURS = 5;
     public static final int SLOT_DURATION = 20;
 
     public int getSlotNo() {
@@ -22,7 +22,7 @@ public class ChargingPoint {
         return slotsNo;
     }
 
-    public AID[] chargingQueue = new AID[getSlotNo()];
+    public AID[] chargingQueue = new AID[getSlotNo() + 1];
 
     public ChargingPoint(String cpId, boolean isOccupied) {
         this.cpId = cpId;

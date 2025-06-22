@@ -66,11 +66,11 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 }
                 double minPrice = evAgent.getChargingPrice();
                 double maxPrice = minPrice * 2;
-                double chargeFactor = (100 - evAgent.getBatteryLevel()) / 100.0;  //charging urgency zmienic!!!!!!!
+                double chargeFactor = (100 - evAgent.getBatteryLevel()) / 100.0;
 
-                System.out.printf("[%s]----------------min price: %.2f, max price: %.2f, charge factor: %.2f\n",evAgent.getLocalName(), minPrice, maxPrice, chargeFactor);
+                System.out.printf("[%s]----------------min price: %.2f, max price: %.2f, urgency: %.2f\n",evAgent.getLocalName(), minPrice, maxPrice, evAgent.getChargingUrgency());
 
-                double firstBid = offer + (maxPrice - offer) * chargeFactor;
+                double firstBid = offer + (maxPrice - offer) * evAgent.getChargingUrgency();
 
                 System.out.printf("[%s] Received CFP from %s: %.2f, calculated first bid: %.2f\n",
                         myAgent.getLocalName(), buyer.getLocalName(), offer, firstBid);
