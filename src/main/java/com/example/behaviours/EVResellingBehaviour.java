@@ -78,7 +78,7 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                 ACLMessage reply = msg.createReply();
 
 
-                if (offer < minPrice)
+                if (offer < minPrice || evAgent.getBatteryLevel() < 30)
                 {
                     // Too low, reject immediately
                     reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
@@ -120,6 +120,9 @@ public class EVResellingBehaviour extends CyclicBehaviour {
                     reply.addReceiver(csInform);
 
                     AID evBuyer = msg.getSender();
+                    double buyersUrgency = Double.parseDouble(msg.getContent());
+
+                    System.out.printf(String.format("XXXXXXXXXXXXXDDDDDDDDDDDDDDDDD buyer urgency: %.2f, seller urgency: %.2f\n", buyersUrgency , evAgent.getChargingUrgency()));
 
                     reply.setContent(String.format(Locale.US, "%d:%s:%s", evAgent.getSlot(), evBuyer.getLocalName(), evAgent.getCpId()));
                     myAgent.send(reply);

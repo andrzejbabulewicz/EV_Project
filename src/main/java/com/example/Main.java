@@ -28,8 +28,8 @@ public class Main
         // SIMULATION PARAMETERS
         int noOfCp = 10;
         int noOfCs = 5;
-        int noOfEv = 50;
-        int numberOfExtraRoads = 2;
+        int noOfEv = 40;
+        int numberOfExtraRoads = 8;
 
         List<AgentController> csAgents = new ArrayList<>();
         List<AgentController> evAgents = new ArrayList<>();
@@ -100,7 +100,7 @@ public class Main
             Random r = new Random();
             //------------Initialize Electric Vehicles---------------
             for (int i = 0; i < noOfEv; i++) {
-                double batteryLevel = 35 + 30 * r.nextDouble();
+                double batteryLevel = 45 + 55 * r.nextDouble();
                 String evName = String.format("ev%d", i + 1);
                 evAgents.add(container.createNewAgent(evName, "com.example.agents.EVAgent",
                         new Object[]{
@@ -110,7 +110,7 @@ public class Main
                                 100.0,    // maxBatteryLevel
                                 stations.get((int)(r.nextDouble()*noOfCs)), // currentLocation
                                 500.0, // totalMoney
-                                r.nextDouble() // chargingUrgency
+                                Math.max(0.0, Math.min(1.0, (r.nextGaussian() * 0.15) + 0.5)) // chargingUrgency
                         }));
             }
 

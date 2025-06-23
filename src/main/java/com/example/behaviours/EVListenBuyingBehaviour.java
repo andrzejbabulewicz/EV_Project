@@ -124,6 +124,7 @@ public class EVListenBuyingBehaviour extends OneShotBehaviour {
                 // Send final reply
                 ACLMessage finalYes = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                 finalYes.setConversationId(Integer.toString(evAgent.getSlot()));
+                finalYes.setContent(String.format(Locale.US, "%.2f", evAgent.getChargingUrgency()));
                 finalYes.addReceiver(finalSeller);
                 evAgent.send(finalYes);
 

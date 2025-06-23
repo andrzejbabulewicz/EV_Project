@@ -217,7 +217,8 @@ public class EVAgent extends Agent {
         }
 
         // Sort the distances by distance
-        sortedStations =  distances.entrySet().stream()
+        sortedStations = distances.entrySet().stream()
+                .filter(entry -> entry.getValue() <= batteryLevel * batteryPerKm)
                 .sorted(java.util.Map.Entry.comparingByValue())
                 .collect(LinkedHashMap::new,
                         (m, e) -> m.put(e.getKey(), e.getValue()),
